@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
+const db = new sqlite3.Database('db.sqlite');
 
 const POST_SCHEMA = `
   CREATE TABLE IF NOT EXISTS post (
@@ -28,15 +28,27 @@ const COMMENT_SCHEMA = `
   `;
 
 const INSERT_USER_1 = `
-    INSERT INTO user (name, email, password)
-    VALUES( 'Andrew', 'a@a.a', '123')
+    INSERT OR IGNORE INTO user (name, email, password)
+    VALUES( 'Andrew', 'a@a.a', '123') 
 `;
+
+const INSERT_POST_1 = `
+    INSERT OR IGNORE INTO post (title, content)
+    VALUES( 'First Post', 'This is my first post :)') 
+`;
+
 db.serialize(() => {
-  bd.run('PRAGMA foreign_keys=ON');
+  db.run('PRAGMA foreign_keys=ON');
   db.run(POST_SCHEMA);
   db.run(USER_SCHEMA);
   db.run(COMMENT_SCHEMA);
   db.run(INSERT_USER_1);
+  db.run(INSERT_POST_1);
+
+  db.each('SELECT * FROM user', (err, usuario) => {
+    console.log('Usuario: ');
+    console.log(usuario);
+  });
 });
 
 process.on('SIGINT', () =>
@@ -45,4 +57,4 @@ process.on('SIGINT', () =>
   })
 );
 
-db.close();
+module.exports = db;
