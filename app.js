@@ -4,6 +4,15 @@ const port = 3000;
 
 const db = require('./database');
 const routes = require('./routes');
+
+const bodyParser = require('body-parser');
+
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
+
 routes(app);
 
 app.listen(port, () => console.log(`App listening on port ${port}`));

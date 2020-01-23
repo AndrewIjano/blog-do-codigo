@@ -5,14 +5,15 @@ class PostsDao {
     return new Promise((resolve, reject) => {
       db.run(
         `
-        INSERT INTO posts (
+        INSERT INTO post (
           title, 
           content
-        ) VALUES (?, ?, ?)
+        ) VALUES (?, ?)
       `,
         [post.title, post.content],
         err => {
           if (err) {
+            console.error(err);
             return reject('Error while adding the post!');
           }
 

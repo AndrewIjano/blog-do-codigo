@@ -2,9 +2,9 @@ const PostsDao = require('./posts-dao');
 const { check, validationResult } = require('express-validator');
 
 class Post {
-  constructor(title, content) {
-    this.title = title;
-    this.content = content;
+  constructor(post) {
+    this.title = post.title;
+    this.content = post.content;
   }
 
   add() {
