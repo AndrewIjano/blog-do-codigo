@@ -5,5 +5,5 @@ module.exports = app => {
   app
     .route('/posts')
     .get(postsControlador.lista)
-    .post(Post.validador(), postsControlador.adiciona);
+    .post(Post.regrasValidacao(), Post.valida, postsControlador.adiciona);
 };

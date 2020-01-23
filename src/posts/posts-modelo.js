@@ -12,7 +12,15 @@ class Post {
     return postsDao.adiciona(this);
   }
 
-  static validador() {
+  static valida(req, res, next) {
+    const erros = validationResult(req);
+    if (erros.isEmpty()) {
+      return next();
+    }
+    return res.status(422).json({ erros: erros.array() });
+  }
+
+  static regrasValidacao() {
     return [
       check('titulo')
         .isLength({ min: 5 })
