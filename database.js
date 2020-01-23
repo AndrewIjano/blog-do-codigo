@@ -33,8 +33,12 @@ const INSERT_USER_1 = `
 `;
 
 const INSERT_POST_1 = `
-    INSERT OR IGNORE INTO post (title, content)
-    VALUES( 'First Post', 'This is my first post :)') 
+    INSERT INTO post (title, content)
+    SELECT  'First Post', 'This is my first post :)'
+    WHERE NOT EXISTS (
+      SELECT * FROM post 
+      WHERE title = 'First Post'
+      ) 
 `;
 
 db.serialize(() => {
