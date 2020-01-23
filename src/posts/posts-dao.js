@@ -5,7 +5,7 @@ class PostsDao {
     return new Promise((resolve, reject) => {
       db.run(
         `
-        INSERT INTO post (
+        INSERT INTO posts (
           titulo, 
           conteudo
         ) VALUES (?, ?)
@@ -25,7 +25,7 @@ class PostsDao {
 
   lista() {
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM post`, (err, resultados) => {
+      db.all(`SELECT * FROM posts`, (err, resultados) => {
         if (err) {
           console.error(err);
           return reject('Erro ao listar os posts!');
