@@ -1,20 +1,20 @@
 const db = require('../../database');
 
 class PostsDao {
-  add(post) {
+  adiciona(post) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         INSERT INTO post (
-          title, 
-          content
+          titulo, 
+          conteudo
         ) VALUES (?, ?)
       `,
-        [post.title, post.content],
+        [post.titulo, post.conteudo],
         err => {
           if (err) {
             console.error(err);
-            return reject('Error while adding the post!');
+            return reject('Erro ao adicionar o post!');
           }
 
           resolve();
@@ -23,14 +23,14 @@ class PostsDao {
     });
   }
 
-  all() {
+  lista() {
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM post`, (err, rows) => {
+      db.all(`SELECT * FROM post`, (err, resultados) => {
         if (err) {
-          return reject('Error while getting the posts!');
+          return reject('Erro ao listar os posts!');
         }
 
-        return resolve(rows);
+        return resolve(resultados);
       });
     });
   }

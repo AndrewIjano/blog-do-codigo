@@ -1,22 +1,22 @@
 const { validationResult } = require('express-validator');
-const Post = require('./posts-model');
+const Post = require('./posts-modelo');
 
 module.exports = {
-  add: (req, res) => {
+  adiciona: (req, res) => {
     const post = new Post(req.body);
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+    const erros = validationResult(req);
+    if (!erros.isEmpty()) {
+      return res.status(422).json({ erros: erros.array() });
     }
 
     post
-      .add()
+      .adiciona()
       .then(res.redirect('/posts'))
       .catch(err => console.error(err));
   },
-  list: (req, res) => {
-    Post.all()
+  lista: (req, res) => {
+    Post.lista()
       .then(posts => {
         res.send(posts);
       })

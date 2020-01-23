@@ -4,17 +4,17 @@ const db = new sqlite3.Database('db.sqlite');
 const POST_SCHEMA = `
   CREATE TABLE IF NOT EXISTS post (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title VARCHAR(50) NOT NULL,
-    content VARCHAR(140)
+    titulo VARCHAR(50) NOT NULL,
+    conteudo VARCHAR(140)
   )
   `;
 
-const USER_SCHEMA = `
-  CREATE TABLE IF NOT EXISTS user (
+const USUARIO_SCHEMA = `
+  CREATE TABLE IF NOT EXISTS usuario (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(40) NOT NULL UNIQUE,
+    nome VARCHAR(40) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
+    senha VARCHAR(255) NOT NULL
   )
   `;
 
@@ -22,34 +22,34 @@ const COMMENT_SCHEMA = `
     CREATE TABLE IF NOT EXISTS comment (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       post_id INTEGER REFERENCES post(id),
-      user_id INTEGER REFERENCES user(id),
-      content VARCHAR(140)
+      usuario_id INTEGER REFERENCES usuario(id),
+      conteudo VARCHAR(140)
     )
   `;
 
-const INSERT_USER_1 = `
-    INSERT OR IGNORE INTO user (name, email, password)
+const INSERT_USUARIO_1 = `
+    INSERT OR IGNORE INTO usuario (nome, email, senha)
     VALUES( 'Andrew', 'a@a.a', '123') 
 `;
 
 const INSERT_POST_1 = `
-    INSERT INTO post (title, content)
-    SELECT  'First Post', 'This is my first post :)'
+    INSERT INTO post (titulo, conteudo)
+    SELECT  'Primeiro post', 'Esse é o meu primeiro post :)'
     WHERE NOT EXISTS (
       SELECT * FROM post 
-      WHERE title = 'First Post'
+      WHERE titulo = 'Primeiro post'
       ) 
 `;
 
 db.serialize(() => {
   db.run('PRAGMA foreign_keys=ON');
   db.run(POST_SCHEMA);
-  db.run(USER_SCHEMA);
+  db.run(USUARIO_SCHEMA);
   db.run(COMMENT_SCHEMA);
-  db.run(INSERT_USER_1);
+  db.run(INSERT_USUARIO_1);
   db.run(INSERT_POST_1);
 
-  db.each('SELECT * FROM user', (err, usuario) => {
+  db.each('SELECT * FROM usuario', (err, usuario) => {
     console.log('Usuario: ');
     console.log(usuario);
   });
