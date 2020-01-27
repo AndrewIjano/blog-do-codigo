@@ -17,7 +17,7 @@ class PostsDao {
             return reject('Erro ao adicionar o post!');
           }
 
-          resolve();
+          return resolve();
         }
       );
     });
@@ -27,6 +27,7 @@ class PostsDao {
     return new Promise((resolve, reject) => {
       db.all(`SELECT * FROM post`, (err, resultados) => {
         if (err) {
+          console.error(err);
           return reject('Erro ao listar os posts!');
         }
 

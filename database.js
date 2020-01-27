@@ -19,7 +19,7 @@ const USUARIO_SCHEMA = `
   `;
 
 const COMMENT_SCHEMA = `
-    CREATE TABLE IF NOT EXISTS comment (
+    CREATE TABLE IF NOT EXISTS comentario (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       post_id INTEGER REFERENCES post(id),
       usuario_id INTEGER REFERENCES usuario(id),

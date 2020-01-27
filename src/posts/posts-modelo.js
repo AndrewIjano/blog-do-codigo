@@ -1,10 +1,10 @@
 const PostsDao = require('./posts-dao');
-const { check, validationResult } = require('express-validator');
 
 class Post {
   constructor(post) {
     this.titulo = post.titulo;
     this.conteudo = post.conteudo;
+    this.valida();
   }
 
   adiciona() {
@@ -12,23 +12,14 @@ class Post {
     return postsDao.adiciona(this);
   }
 
-  static valida(req, res, next) {
-    const erros = validationResult(req);
-    if (erros.isEmpty()) {
-      return next();
-    }
-    return res.status(422).json({ erros: erros.array() });
-  }
+  valida() {
+    if (typeof this.titulo !== 'string' || this.titulo.length < 5)
+      throw new Error('O título precisa ter mais de 5 caracteres!');
 
-  static regrasValidacao() {
-    return [
-      check('titulo')
-        .isLength({ min: 5 })
-        .withMessage('O título precisa ter mais de 5 caracteres!'),
-      check('conteudo')
-        .isLength({ max: 140 })
-        .withMessage('O conteúdo do post não pode ter mais de 140 caracteres!')
-    ];
+    if (typeof this.conteudo !== 'string' || this.conteudo.length > 140)
+      throw new Error(
+        'O conteúdo do post não pode ter mais de 140 caracteres!'
+      );
   }
 
   static lista() {
