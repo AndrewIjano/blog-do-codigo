@@ -7,4 +7,6 @@ module.exports = app => {
     .post(usuariosControlador.efetuaLogin);
 
   app.route('/registra').post(usuariosControlador.registra);
+
+  app.route('/logout').get(usuariosControlador.logout);
 };

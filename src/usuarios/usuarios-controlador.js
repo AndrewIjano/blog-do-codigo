@@ -10,7 +10,7 @@ module.exports = {
         .then(() => {
           res.send('Registrado :)');
         })
-        .catch(erro => {  
+        .catch(erro => {
           res.status(500).json({ erro: erro });
         });
     } catch (erro) {
@@ -19,6 +19,10 @@ module.exports = {
   },
   login: (req, res) => {
     res.send('Página de login :)');
+  },
+  logout: (req, res) => {
+    req.logout();
+    res.send('Logout OK!');
   },
   efetuaLogin: (req, res, next) => {
     const passport = req.passport;
