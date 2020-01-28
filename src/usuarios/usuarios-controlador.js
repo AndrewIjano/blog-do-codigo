@@ -1,4 +1,22 @@
+const Usuario = require('./usuarios-modelo');
+
 module.exports = {
+  registra: (req, res) => {
+    try {
+      const usuario = new Usuario(req.body);
+
+      usuario
+        .adiciona()
+        .then(() => {
+          res.send('Registrado :)');
+        })
+        .catch(erro => {  
+          res.status(500).json({ erro: erro });
+        });
+    } catch (erro) {
+      res.status(422).json({ erro: erro.message });
+    }
+  },
   login: (req, res) => {
     res.send('Página de login :)');
   },

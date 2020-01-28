@@ -1,4 +1,5 @@
 const PostsDao = require('./posts-dao');
+const InvalidArgumentError = require('../../erros').InvalidArgumentError;
 
 class Post {
   constructor(post) {
@@ -14,10 +15,12 @@ class Post {
 
   valida() {
     if (typeof this.titulo !== 'string' || this.titulo.length < 5)
-      throw new Error('O título precisa ter mais de 5 caracteres!');
+      throw new InvalidArgumentError(
+        'O título precisa ter mais de 5 caracteres!'
+      );
 
     if (typeof this.conteudo !== 'string' || this.conteudo.length > 140)
-      throw new Error(
+      throw new InvalidArgumentError(
         'O conteúdo do post não pode ter mais de 140 caracteres!'
       );
   }

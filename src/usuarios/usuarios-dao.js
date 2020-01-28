@@ -1,6 +1,27 @@
 const db = require('../../database');
 
 class UsuariosDao {
+  adiciona(usuario) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        `
+        INSERT INTO usuarios (
+          nome,
+          email,
+          senha
+        ) VALUES (?, ?, ?)
+      `,
+        [usuario.nome, usuario.email, usuario.senha],
+        err => {
+          if (err) {
+            reject('Erro ao adicionar o usuário!');
+          }
+
+          return resolve();
+        }
+      );
+    });
+  }
   buscaPorId(id) {
     return new Promise((resolve, reject) => {
       db.get(
@@ -42,6 +63,5 @@ class UsuariosDao {
     });
   }
 }
-
 
 module.exports = UsuariosDao;
