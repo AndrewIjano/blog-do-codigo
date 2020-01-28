@@ -36,10 +36,7 @@ module.exports = app => {
   app.use(sessao({ 
     secret: 'alura!!',
     resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: true
-    }  
+    saveUninitialized: false
   }));
 
   app.use(passport.initialize());

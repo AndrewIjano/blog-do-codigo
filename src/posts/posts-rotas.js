@@ -1,8 +1,9 @@
 const postsControlador = require('./posts-controlador');
+const usuariosControlador = require('../usuarios').controlador;
 
 module.exports = app => {
   app
     .route('/posts')
     .get(postsControlador.lista)
-    .post(postsControlador.adiciona);
+    .post(usuariosControlador.autentica, postsControlador.adiciona);
 };
