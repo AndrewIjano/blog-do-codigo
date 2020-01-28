@@ -29,7 +29,7 @@ const COMENTARIOS_SCHEMA = `
 
 const INSERT_USUARIO_1 = `
     INSERT OR IGNORE INTO usuarios (nome, email, senha)
-    VALUES( 'Andrew', 'a@a.a', '123') 
+    VALUES( 'Andrew', 'a@a.a', '123123') 
 `;
 
 const INSERT_POST_1 = `

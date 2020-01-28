@@ -46,5 +46,20 @@ module.exports = {
     } else {
       res.redirect('/login');
     }
+  },
+  deleta: (req, res) => {
+    if (req.user.id != req.params.id) {
+      res.status(403).send('Você precisa entrar como esse usuário para isso!');
+    }
+
+    const usuario = new Usuario(req.user);
+    usuario
+      .deleta()
+      .then(() => {
+        res.send('Usuário deletado com sucesso!');
+      })
+      .catch(erro => {
+        res.status(500).json({ erro: erro });
+      });
   }
 };

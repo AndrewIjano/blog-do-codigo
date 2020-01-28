@@ -28,6 +28,11 @@ class Usuario {
       );
   }
 
+  deleta() {
+    const usuariosDao = new UsuariosDao();
+    return usuariosDao.deleta(this);
+  }
+
   static buscaPorId(id) {
     const usuariosDao = new UsuariosDao();
     return usuariosDao.buscaPorId(id);

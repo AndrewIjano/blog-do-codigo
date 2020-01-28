@@ -22,6 +22,7 @@ class UsuariosDao {
       );
     });
   }
+
   buscaPorId(id) {
     return new Promise((resolve, reject) => {
       db.get(
@@ -42,6 +43,7 @@ class UsuariosDao {
       );
     });
   }
+
   buscaPorEmail(email) {
     return new Promise((resolve, reject) => {
       db.get(
@@ -58,6 +60,25 @@ class UsuariosDao {
           }
 
           return resolve(usuario);
+        }
+      );
+    });
+  }
+
+  deleta(usuario) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        `
+        DELETE FROM usuarios
+        WHERE email = ?
+      `,
+        [usuario.email],
+        err => {
+          if (err) {
+            console.error(err);
+            return reject('Erro ao deletar o usuário');
+          }
+          return resolve();
         }
       );
     });
