@@ -48,8 +48,10 @@ module.exports = {
     }
   },
   deleta: (req, res) => {
-    if (req.user.id != req.params.id) {
-      res.status(403).send('Você precisa entrar como esse usuário para isso!');
+    if (!req.user || req.user.id != req.params.id) {
+      return res
+        .status(403)
+        .send('Você precisa entrar como esse usuário para isso!');
     }
 
     const usuario = new Usuario(req.user);
