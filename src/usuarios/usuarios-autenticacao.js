@@ -33,15 +33,17 @@ module.exports = app => {
       .catch(erro => done(erro));
   });
 
-  app.use(sessao({ 
-    secret: 'alura!!',
-    resave: false,
-    saveUninitialized: false
-  }));
+  app.use(
+    sessao({
+      secret: 'alura!!',
+      resave: false,
+      saveUninitialized: false
+    })
+  );
 
   app.use(passport.initialize());
   app.use(passport.session());
-  
+
   app.use((req, res, next) => {
     req.passport = passport;
     next();

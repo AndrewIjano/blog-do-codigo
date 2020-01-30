@@ -17,14 +17,8 @@ module.exports = {
       res.status(422).json({ erro: erro.message });
     }
   },
-  login: (req, res) => {
-    res.send('Página de login :)');
-  },
-  logout: (req, res) => {
-    req.logout();
-    res.send('Logout OK!');
-  },
-  efetuaLogin: (req, res, next) => {
+
+  login: (req, res, next) => {
     const passport = req.passport;
 
     passport.authenticate('local', (erro, usuario, info) => {
@@ -40,6 +34,12 @@ module.exports = {
       });
     })(req, res, next);
   },
+
+  logout: (req, res) => {
+    req.logout();
+    res.send('Logout OK!');
+  },
+
   autentica: (req, res, next) => {
     if (req.isAuthenticated()) {
       return next();
@@ -47,6 +47,7 @@ module.exports = {
       res.redirect('/login');
     }
   },
+
   deleta: (req, res) => {
     if (!req.user || req.user.id != req.params.id) {
       return res

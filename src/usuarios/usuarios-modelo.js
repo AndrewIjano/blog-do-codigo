@@ -1,5 +1,5 @@
-const UsuariosDao = require('./usuarios-dao');
-const InvalidArgumentError = require('../../erros').InvalidArgumentError;
+const usuariosDao = require('./usuarios-dao');
+const { InvalidArgumentError } = require('../../erros');
 
 class Usuario {
   constructor(usuario) {
@@ -11,7 +11,6 @@ class Usuario {
   }
 
   adiciona() {
-    const usuariosDao = new UsuariosDao();
     return usuariosDao.adiciona(this);
   }
 
@@ -29,17 +28,14 @@ class Usuario {
   }
 
   deleta() {
-    const usuariosDao = new UsuariosDao();
     return usuariosDao.deleta(this);
   }
 
   static buscaPorId(id) {
-    const usuariosDao = new UsuariosDao();
     return usuariosDao.buscaPorId(id);
   }
 
   static buscaPorEmail(email) {
-    const usuariosDao = new UsuariosDao();
     return usuariosDao.buscaPorEmail(email);
   }
 }

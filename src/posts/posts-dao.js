@@ -1,7 +1,7 @@
 const db = require('../../database');
 
-class PostsDao {
-  adiciona(post) {
+module.exports = {
+  adiciona: post => {
     return new Promise((resolve, reject) => {
       db.run(
         `
@@ -21,9 +21,9 @@ class PostsDao {
         }
       );
     });
-  }
+  },
 
-  lista() {
+  lista: () => {
     return new Promise((resolve, reject) => {
       db.all(`SELECT * FROM posts`, (err, resultados) => {
         if (err) {
@@ -35,6 +35,4 @@ class PostsDao {
       });
     });
   }
-}
-
-module.exports = PostsDao;
+};

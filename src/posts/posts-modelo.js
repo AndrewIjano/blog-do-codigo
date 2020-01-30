@@ -1,5 +1,5 @@
-const PostsDao = require('./posts-dao');
-const InvalidArgumentError = require('../../erros').InvalidArgumentError;
+const postsDao = require('./posts-dao');
+const { InvalidArgumentError } = require('../../erros');
 
 class Post {
   constructor(post) {
@@ -9,7 +9,6 @@ class Post {
   }
 
   adiciona() {
-    const postsDao = new PostsDao();
     return postsDao.adiciona(this);
   }
 
@@ -26,7 +25,6 @@ class Post {
   }
 
   static lista() {
-    const postsDao = new PostsDao();
     return postsDao.lista();
   }
 }
