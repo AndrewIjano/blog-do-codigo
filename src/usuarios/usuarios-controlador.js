@@ -1,20 +1,24 @@
 const Usuario = require('./usuarios-modelo');
+const { InvalidArgumentError, InternalServerError } = require('../../erros');
 
 module.exports = {
-  registra: (req, res) => {
-    try {
-      const usuario = new Usuario(req.body);
+  registra: async (req, res) => {
+    const { nome, email, senha } = req.body;
 
-      usuario
-        .adiciona()
-        .then(() => {
-          res.send('Registrado :)');
-        })
-        .catch(erro => {
-          res.status(500).json({ erro: erro });
-        });
+    try {
+      const usuario = new Usuario({ nome, email });
+      await usuario.adicionaSenha(senha);
+      await usuario.adiciona();
+
+      res.status(201).json(usuario);
     } catch (erro) {
-      res.status(422).json({ erro: erro.message });
+      if (erro instanceof InvalidArgumentError) {
+        res.status(422).json({ erro: erro.message });
+      } else if (erro instanceof InternalServerError) {
+        res.status(500).json({ erro: erro.message });
+      } else {
+        res.status(500).json({ erro: erro.message });
+      }
     }
   },
 

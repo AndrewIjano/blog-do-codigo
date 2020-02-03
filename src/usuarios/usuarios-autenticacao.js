@@ -2,6 +2,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Usuario = require('./usuarios-modelo');
 const sessao = require('express-session');
+const bcrypt = require('bcrypt');
 
 module.exports = app => {
   passport.use(
@@ -10,18 +11,27 @@ module.exports = app => {
         usernameField: 'email',
         passwordField: 'senha'
       },
-      (email, senha, done) => {
-        Usuario.buscaPorEmail(email)
-          .then(usuario => {
-            if (!usuario || senha != usuario.senha) {
-              return done(null, false, {
-                mensagem: 'Login ou senha incorretos'
-              });
-            }
+      async (email, senha, done) => {
+        try {
+          const usuario = await Usuario.buscaPorEmail(email);
+          if (!usuario) {
+            return done(null, false, {
+              mensagem: 'Não existe usuário com esse e-mail!'
+            });
+          }
 
-            return done(null, usuario);
-          })
-          .catch(erro => done(erro));
+          const senhaCorreta = await bcrypt.compare(senha, usuario.senhaHash);
+
+          if (!senhaCorreta) {
+            return done(null, false, {
+              mensagem: 'Login ou senha incorretos'
+            });
+          }
+
+          return done(null, usuario);
+        } catch (erro) {
+          done(erro);
+        }
       }
     )
   );
@@ -33,16 +43,7 @@ module.exports = app => {
       .catch(erro => done(erro));
   });
 
-  app.use(
-    sessao({
-      secret: 'alura!!',
-      resave: false,
-      saveUninitialized: false
-    })
-  );
-
   app.use(passport.initialize());
-  app.use(passport.session());
 
   app.use((req, res, next) => {
     req.passport = passport;

@@ -1,4 +1,5 @@
 const db = require('../../database');
+const { InvalidArgumentError, InternalServerError } = require('../../erros');
 
 module.exports = {
   adiciona: usuario => {
@@ -8,13 +9,17 @@ module.exports = {
           INSERT INTO usuarios (
             nome,
             email,
-            senha
+            senhaHash
           ) VALUES (?, ?, ?)
         `,
-        [usuario.nome, usuario.email, usuario.senha],
+        [usuario.nome, usuario.email, usuario.senhaHash],
         err => {
           if (err) {
-            reject('Erro ao adicionar o usuário!');
+            if (err.errno === 19) {
+              reject(new InvalidArgumentError('Erro ao adicionar o usuário!'));
+            } else {
+              reject(new InternalServerError('Erro ao adicionar o usuário!'));
+            }
           }
 
           return resolve();

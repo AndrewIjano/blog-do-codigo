@@ -1,13 +1,25 @@
 const usuariosDao = require('./usuarios-dao');
 const { InvalidArgumentError } = require('../../erros');
+const bcrypt = require('bcrypt');
 
 class Usuario {
   constructor(usuario) {
     this.nome = usuario.nome;
     this.email = usuario.email;
-    this.senha = usuario.senha;
 
     this.valida();
+  }
+
+  adicionaSenha(senha) {
+    if (typeof senha !== 'string' || senha.length < 6)
+      throw new InvalidArgumentError(
+        'A senha precisa ter mais de 6 caracteres!'
+      );
+
+    const custoHash = 12;
+    return bcrypt.hash(senha, custoHash).then(senhaHash => {
+      this.senhaHash = senhaHash;
+    });
   }
 
   adiciona() {
@@ -15,16 +27,13 @@ class Usuario {
   }
 
   valida() {
-    if (this.nome.length === 0)
-      throw new InvalidArgumentError('É necessário preencher o campo nome!');
+    this.campoStringNaoNulo(this.nome, 'nome');
+    this.campoStringNaoNulo(this.email, 'email');
+  }
 
-    if (this.email.length === 0)
-      throw new InvalidArgumentError('É necessário preencher o campo email!');
-
-    if (this.senha.length < 6)
-      throw new InvalidArgumentError(
-        'A senha precisa ter mais de 6 caracteres!'
-      );
+  campoStringNaoNulo(valor, nome) {
+    if (typeof valor !== 'string' || valor === 0)
+      throw new InvalidArgumentError(`É necessário preencher o campo ${nome}!`);
   }
 
   deleta() {
