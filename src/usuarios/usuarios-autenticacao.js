@@ -1,8 +1,10 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const Usuario = require('./usuarios-modelo');
-const sessao = require('express-session');
+const passportJWT = require('passport-jwt');
+const JWTStrategy = passportJWT.Strategy;
 const bcrypt = require('bcrypt');
+
+const Usuario = require('./usuarios-modelo');
 
 module.exports = app => {
   passport.use(
@@ -36,14 +38,17 @@ module.exports = app => {
     )
   );
 
-  passport.serializeUser((usuario, done) => done(null, usuario.id));
-  passport.deserializeUser((usuarioId, done) => {
-    Usuario.buscaPorId(usuarioId)
-      .then(usuario => done(null, usuario))
-      .catch(erro => done(erro));
-  });
-
-  app.use(passport.initialize());
+  passport.use(
+    new JWTStrategy(
+      {
+        jwtFromRequest: req => req.cookies.jwt,
+        secretOrKey: 'secret'
+      },
+      (payload, done) => {
+        return done(null, payload);
+      }
+    )
+  );
 
   app.use((req, res, next) => {
     req.passport = passport;
