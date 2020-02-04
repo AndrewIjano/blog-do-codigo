@@ -49,9 +49,4 @@ module.exports = app => {
       }
     )
   );
-
-  app.use((req, res, next) => {
-    req.passport = passport;
-    next();
-  });
 };

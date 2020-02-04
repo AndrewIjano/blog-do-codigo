@@ -11,10 +11,8 @@ class Usuario {
   }
 
   adicionaSenha(senha) {
-    if (typeof senha !== 'string' || senha.length < 6)
-      throw new InvalidArgumentError(
-        'A senha precisa ter mais de 6 caracteres!'
-      );
+    this.campoStringNaoNulo(senha, 'senha');
+    this.campoTamanhoMinimo(senha, 'senha');
 
     const custoHash = 12;
     return bcrypt.hash(senha, custoHash).then(senhaHash => {
@@ -34,6 +32,13 @@ class Usuario {
   campoStringNaoNulo(valor, nome) {
     if (typeof valor !== 'string' || valor === 0)
       throw new InvalidArgumentError(`É necessário preencher o campo ${nome}!`);
+  }
+
+  campoTamanhoMinimo(valor, nome, minimo) {
+    if (valor.length < minimo)
+      throw new InvalidArgumentError(
+        `O campo ${nome} precisa ser maior que ${minimo} caracteres!`
+      );
   }
 
   deleta() {
