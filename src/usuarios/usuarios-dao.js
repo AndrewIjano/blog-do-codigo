@@ -14,8 +14,8 @@ module.exports = {
           ) VALUES (?, ?, ?, ?)
         `,
         [usuario.nome, usuario.email, usuario.senhaHash, usuario.ultimoLogout],
-        err => {
-          if (err) {
+        erro => {
+          if (erro) {
             reject(new InternalServerError('Erro ao adicionar o usuário!'));
           }
 
@@ -108,11 +108,11 @@ module.exports = {
       db.run(
         `
           DELETE FROM usuarios
-          WHERE email = ?
+          WHERE id = ?
         `,
-        [usuario.email],
-        err => {
-          if (err) {
+        [usuario.id],
+        erro => {
+          if (erro) {
             return reject('Erro ao deletar o usuário');
           }
           return resolve();

@@ -46,21 +46,19 @@ module.exports = {
     res.status(200).send();
   },
 
-  deleta: (req, res) => {
-    if (!req.user || req.user.id != req.params.id) {
+  deleta: async (req, res) => {
+    if (req.user.id != req.params.id) {
       return res
         .status(403)
         .send('Você precisa entrar como esse usuário para isso!');
     }
 
-    const usuario = new Usuario(req.user);
-    usuario
-      .deleta()
-      .then(() => {
-        res.send('Usuário deletado com sucesso!');
-      })
-      .catch(erro => {
-        res.status(500).json({ erro: erro });
-      });
+    const usuario = req.user;
+    try {
+      await usuario.deleta();
+      res.status(200).send();
+    } catch (erro) {
+      res.status(500).json({ erro: erro });
+    }
   }
 };

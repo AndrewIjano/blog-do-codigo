@@ -58,13 +58,13 @@ class Usuario {
       );
   }
 
-  atualizaLogout() {
+  async atualizaLogout() {
     this.ultimoLogout = new Date().toJSON();
 
     return usuariosDao.atualizaLogout(this);
   }
 
-  deleta() {
+  async deleta() {
     return usuariosDao.deleta(this);
   }
 
