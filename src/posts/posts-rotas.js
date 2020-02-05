@@ -1,13 +1,12 @@
 const postsControlador = require('./posts-controlador');
-const usuariosControlador = require('../usuarios').controlador;
-const passport = require('passport');
+const { middlewareAutenticacao } = require('../usuarios');
 
 module.exports = app => {
   app
     .route('/posts')
     .get(postsControlador.lista)
     .post(
-      passport.authenticate('bearer', { session: false }),
+      middlewareAutenticacao.bearer,
       postsControlador.adiciona
     );
 };

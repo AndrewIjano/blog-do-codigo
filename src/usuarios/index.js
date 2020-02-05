@@ -1,6 +1,7 @@
 module.exports = {
   rotas: require('./usuarios-rotas'),
-  autenticacao: require('./usuarios-autenticacao'),
+  estrategiasAutenticacao: require('./estrategias-autenticacao'),
+  middlewareAutenticacao: require('./middleware-autenticacao'),
   controlador: require('./usuarios-controlador'),
   modelo: require('./usuarios-modelo')
 }

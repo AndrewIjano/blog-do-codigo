@@ -1,11 +1,12 @@
 const usuariosControlador = require('./usuarios-controlador');
 const passport = require('passport');
+const middlewareAutenticacao = require('./middleware-autenticacao');
 
 module.exports = app => {
   app
     .route('/login')
     .post(
-      passport.authenticate('local', { session: false }),
+      middlewareAutenticacao.local,
       usuariosControlador.login
     );
 
