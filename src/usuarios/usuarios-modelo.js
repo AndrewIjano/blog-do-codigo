@@ -12,7 +12,8 @@ class Usuario {
 
   adicionaSenha(senha) {
     this.campoStringNaoNulo(senha, 'senha');
-    this.campoTamanhoMinimo(senha, 'senha');
+    this.campoTamanhoMinimo(senha, 'senha', 8);
+    this.campoTamanhoMaximo(senha, 'senha', 64);
 
     const custoHash = 12;
     return bcrypt.hash(senha, custoHash).then(senhaHash => {
@@ -38,6 +39,12 @@ class Usuario {
     if (valor.length < minimo)
       throw new InvalidArgumentError(
         `O campo ${nome} precisa ser maior que ${minimo} caracteres!`
+      );
+  }
+  campoTamanhoMaximo(valor, nome, maximo) {
+    if (valor.length > maximo)
+      throw new InvalidArgumentError(
+        `O campo ${nome} precisa ser menor que ${maximo} caracteres!`
       );
   }
 
