@@ -44,7 +44,7 @@ module.exports = app => {
       async (token, done) => {
         try {
           const payload = jwt.verify(token, process.env.JWT_KEY);
-          const usuario = await Usuario.buscaPorEmail(payload.email);
+          const usuario = await Usuario.buscaPorId(payload.id);
 
           return done(null, usuario);
         } catch (erro) {

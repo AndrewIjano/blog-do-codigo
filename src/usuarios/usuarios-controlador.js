@@ -27,7 +27,7 @@ module.exports = {
     const usuario = req.user;
 
     const payload = {
-      email: usuario.email
+      id: usuario.id
     };
 
     const token = jwt.sign(payload, process.env.JWT_KEY, {
