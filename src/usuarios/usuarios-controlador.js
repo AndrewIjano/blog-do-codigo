@@ -1,7 +1,6 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../../erros');
 const jwt = require('jsonwebtoken');
-const passport = require('passport');
 
 module.exports = {
   registra: async (req, res) => {
@@ -33,8 +32,8 @@ module.exports = {
 
     const token = jwt.sign(JSON.stringify(payload), 'secret');
 
-    res.cookie('jwt', token, { httpOnly: true, secure: true });
-    return res.status(200).json({ email: usuario.email });
+    res.set('Authorization', token);
+    return res.status(200).send();
   },
 
   logout: (req, res) => {

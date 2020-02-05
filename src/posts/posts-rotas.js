@@ -7,7 +7,7 @@ module.exports = app => {
     .route('/posts')
     .get(postsControlador.lista)
     .post(
-      passport.authenticate('jwt', { session: false }),
+      passport.authenticate('bearer', { session: false }),
       postsControlador.adiciona
     );
 };

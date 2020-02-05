@@ -1,8 +1,9 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const passportJWT = require('passport-jwt');
-const JWTStrategy = passportJWT.Strategy;
 const bcrypt = require('bcrypt');
+const BearerStrategy = require('passport-http-bearer');
+const jwt = require('jsonwebtoken');
+
 
 const Usuario = require('./usuarios-modelo');
 
@@ -39,14 +40,18 @@ module.exports = app => {
   );
 
   passport.use(
-    new JWTStrategy(
-      {
-        jwtFromRequest: req => req.cookies.jwt,
-        secretOrKey: 'secret'
-      },
-      (payload, done) => {
-        return done(null, payload);
+    new BearerStrategy(
+      async (token, done) => {
+        try {
+          const payload = jwt.verify(token, 'secret');
+          const usuario = await Usuario.buscaPorEmail(payload.email);
+
+          return done(null, usuario);
+        } catch (erro) {
+          return done(erro);
+        }
       }
     )
   );
+
 };
