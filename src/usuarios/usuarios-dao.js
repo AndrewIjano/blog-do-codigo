@@ -15,11 +15,7 @@ module.exports = {
         [usuario.nome, usuario.email, usuario.senhaHash],
         err => {
           if (err) {
-            if (err.errno === 19) {
-              reject(new InvalidArgumentError('Erro ao adicionar o usuário!'));
-            } else {
-              reject(new InternalServerError('Erro ao adicionar o usuário!'));
-            }
+            reject(new InternalServerError('Erro ao adicionar o usuário!'));
           }
 
           return resolve();
@@ -39,7 +35,6 @@ module.exports = {
         [id],
         (erro, usuario) => {
           if (erro) {
-            console.error(erro);
             return reject('Não foi possível encontrar o usuário!');
           }
 
@@ -60,7 +55,6 @@ module.exports = {
         [email],
         (erro, usuario) => {
           if (erro) {
-            console.error(erro);
             return reject('Não foi possível encontrar o usuário!');
           }
 
@@ -80,7 +74,6 @@ module.exports = {
         [usuario.email],
         err => {
           if (err) {
-            console.error(err);
             return reject('Erro ao deletar o usuário');
           }
           return resolve();

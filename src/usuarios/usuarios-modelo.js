@@ -10,18 +10,20 @@ class Usuario {
     this.valida();
   }
 
-  adicionaSenha(senha) {
+  async adicionaSenha(senha) {
     this.campoStringNaoNulo(senha, 'senha');
     this.campoTamanhoMinimo(senha, 'senha', 8);
     this.campoTamanhoMaximo(senha, 'senha', 64);
 
     const custoHash = 12;
-    return bcrypt.hash(senha, custoHash).then(senhaHash => {
-      this.senhaHash = senhaHash;
-    });
+    this.senhaHash = await bcrypt.hash(senha, custoHash);
   }
 
-  adiciona() {
+  async adiciona() {
+    if (await Usuario.buscaPorEmail(this.email)) {
+      throw new InvalidArgumentError('O usuário já existe!');
+    }
+
     return usuariosDao.adiciona(this);
   }
 
