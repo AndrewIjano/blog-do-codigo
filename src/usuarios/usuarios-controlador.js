@@ -30,7 +30,7 @@ module.exports = {
       email: usuario.email
     };
 
-    const token = jwt.sign(JSON.stringify(payload), 'secret');
+    const token = jwt.sign(JSON.stringify(payload), process.env.JWT_KEY);
 
     res.set('Authorization', token);
     return res.status(200).send();

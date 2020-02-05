@@ -43,7 +43,7 @@ module.exports = app => {
     new BearerStrategy(
       async (token, done) => {
         try {
-          const payload = jwt.verify(token, 'secret');
+          const payload = jwt.verify(token, process.env.JWT_KEY);
           const usuario = await Usuario.buscaPorEmail(payload.email);
 
           return done(null, usuario);
