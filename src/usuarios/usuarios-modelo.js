@@ -6,7 +6,7 @@ class Usuario {
   constructor(usuario) {
     this.nome = usuario.nome;
     this.email = usuario.email;
-        
+
     this.valida();
   }
 
