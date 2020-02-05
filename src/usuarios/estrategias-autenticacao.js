@@ -44,7 +44,10 @@ module.exports = app => {
   passport.use(
     new BearerStrategy(async (token, done) => {
       try {
-        const payload = jwt.verify(token, process.env.JWT_KEY);
+        const payload = jwt.decode(token);
+        const ultimoLogout = await Usuario.buscaUltimoLogout(payload.id);
+        
+        jwt.verify(token, process.env.JWT_KEY + ultimoLogout);
         const usuario = await Usuario.buscaPorId(payload.id);
 
         return done(null, usuario);

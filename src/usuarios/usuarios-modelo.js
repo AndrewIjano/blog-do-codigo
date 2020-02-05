@@ -4,9 +4,16 @@ const bcrypt = require('bcrypt');
 
 class Usuario {
   constructor(usuario) {
+    this.id = usuario.id;
     this.nome = usuario.nome;
     this.email = usuario.email;
+    this.senhaHash = usuario.senhaHash;
+    this.ultimoLogout = usuario.ultimoLogout;
 
+    if (!this.ultimoLogout) {
+      this.ultimoLogout = new Date().toJSON();
+    }
+    
     this.valida();
   }
 
@@ -43,6 +50,7 @@ class Usuario {
         `O campo ${nome} precisa ser maior que ${minimo} caracteres!`
       );
   }
+
   campoTamanhoMaximo(valor, nome, maximo) {
     if (valor.length > maximo)
       throw new InvalidArgumentError(
@@ -50,16 +58,37 @@ class Usuario {
       );
   }
 
+  atualizaLogout() {
+    this.ultimoLogout = new Date().toJSON();
+
+    return usuariosDao.atualizaLogout(this);
+  }
+
   deleta() {
     return usuariosDao.deleta(this);
   }
 
-  static buscaPorId(id) {
-    return usuariosDao.buscaPorId(id);
+  static async buscaPorId(id) {
+    const usuario = await usuariosDao.buscaPorId(id);
+    if (!usuario) {
+      return null;
+    }
+
+    return new Usuario(usuario);
   }
 
-  static buscaPorEmail(email) {
-    return usuariosDao.buscaPorEmail(email);
+  static async buscaPorEmail(email) {
+    const usuario = await usuariosDao.buscaPorEmail(email);
+    if (!usuario) {
+      return null;
+    }
+    
+    return new Usuario(usuario);
+
+  }
+
+  static async buscaUltimoLogout(id) {
+    return usuariosDao.buscaUltimoLogout(id);
   }
 }
 

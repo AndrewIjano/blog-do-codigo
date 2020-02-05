@@ -9,10 +9,11 @@ module.exports = {
           INSERT INTO usuarios (
             nome,
             email,
-            senhaHash
-          ) VALUES (?, ?, ?)
+            senhaHash,
+            ultimoLogout
+          ) VALUES (?, ?, ?, ?)
         `,
-        [usuario.nome, usuario.email, usuario.senhaHash],
+        [usuario.nome, usuario.email, usuario.senhaHash, usuario.ultimoLogout],
         err => {
           if (err) {
             reject(new InternalServerError('Erro ao adicionar o usuário!'));
@@ -62,6 +63,44 @@ module.exports = {
         }
       );
     });
+  },
+
+  buscaUltimoLogout: id => {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `
+          SELECT ultimoLogout
+          FROM usuarios
+          WHERE id = ?
+        `,
+        [id],
+        (erro, resultado) => {
+          if (erro) {
+            return reject('Não foi possível encontrar o usuário!');
+          }
+
+          return resolve(resultado.ultimoLogout);
+        }
+      );
+    });
+  },
+
+  atualizaLogout: (usuario) => {
+    return new Promise((resolve, reject) => {
+      db.run(
+      `
+        UPDATE usuarios
+        SET ultimoLogout = ?
+        WHERE id = ?
+      `,
+      [usuario.ultimoLogout, usuario.id],
+      erro => {
+        if (erro) {
+          return reject('Não foi possível atualizar o último logout');
+        }
+        return resolve();
+      })
+    })
   },
 
   deleta: usuario => {

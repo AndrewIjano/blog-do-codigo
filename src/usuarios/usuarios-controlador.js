@@ -7,7 +7,7 @@ function criaTokenJWT(usuario) {
     id: usuario.id
   };
 
-  return jwt.sign(payload, process.env.JWT_KEY, {
+  return jwt.sign(payload, process.env.JWT_KEY + usuario.ultimoLogout, {
     expiresIn: '5d'
   });
 }
@@ -40,16 +40,10 @@ module.exports = {
   },
 
   logout: (req, res) => {
-    req.logout();
-    res.send('Logout OK!');
-  },
+    const usuario = req.user;
+    usuario.atualizaLogout();
 
-  autentica: (req, res, next) => {
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      res.redirect('/login');
-    }
+    res.status(200).send();
   },
 
   deleta: (req, res) => {
