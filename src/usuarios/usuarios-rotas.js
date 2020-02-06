@@ -4,7 +4,10 @@ const middlewareAutenticacao = require('./middleware-autenticacao');
 module.exports = app => {
   app
     .route('/login')
-    .post(middlewareAutenticacao.local, usuariosControlador.login);
+    .post(
+      [middlewareAutenticacao.local, middlewareAutenticacao.doisFatores],
+      usuariosControlador.login
+    );
 
   app.route('/registra').post(usuariosControlador.registra);
 

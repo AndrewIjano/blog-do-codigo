@@ -1,6 +1,7 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../../erros');
 const jwt = require('jsonwebtoken');
+const speakeasy = require('speakeasy');
 
 function criaTokenJWT(usuario) {
   const payload = {
@@ -21,7 +22,9 @@ module.exports = {
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
 
-      res.status(201).json(usuario);
+      const codigo = speakeasy.generateSecret().base32;
+
+      res.status(201).json({codigo: codigo});
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(422).json({ erro: erro.message });

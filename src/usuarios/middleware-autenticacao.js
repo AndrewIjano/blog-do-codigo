@@ -1,4 +1,5 @@
 const passport = require('passport');
+const speakeasy = require('speakeasy');
 
 module.exports = {
   bearer: (req, res, next) => {
@@ -43,5 +44,24 @@ module.exports = {
         return next();
       }
     )(req, res, next);
+  },
+
+  doisFatores: (req, res, next) => {
+    if (!req.headers.authorization) {
+      res.status(403);
+    }
+
+    const token = req.headers.authorization;
+    const tokenValido = speakeasy.totp.verify({
+      secret: 'KVCWCVLGGRAGOTBJGVRXSZZWKNRVMVSYNRJG4VKPNESFGILZJIUQ',
+      encoding: 'base32',
+      token: token
+    })
+
+    if (!req.header.authorization) {
+      res.status(400).send({erro: 'Token de autenticação inválido'});  
+    }
+
+  next();
   }
 };
