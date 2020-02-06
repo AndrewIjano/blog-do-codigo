@@ -11,9 +11,8 @@ module.exports = {
         ) VALUES (?, ?)
       `,
         [post.titulo, post.conteudo],
-        err => {
-          if (err) {
-            console.error(err);
+        erro => {
+          if (erro) {
             return reject('Erro ao adicionar o post!');
           }
 
@@ -25,9 +24,8 @@ module.exports = {
 
   lista: () => {
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM posts`, (err, resultados) => {
-        if (err) {
-          console.error(err);
+      db.all(`SELECT * FROM posts`, (erro, resultados) => {
+        if (erro) {
           return reject('Erro ao listar os posts!');
         }
 
