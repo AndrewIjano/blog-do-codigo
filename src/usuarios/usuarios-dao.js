@@ -1,5 +1,5 @@
 const db = require('../../database');
-const { InvalidArgumentError, InternalServerError } = require('../../erros');
+const { InternalServerError } = require('../../erros');
 
 module.exports = {
   adiciona: usuario => {
@@ -85,22 +85,23 @@ module.exports = {
     });
   },
 
-  atualizaLogout: (usuario) => {
+  atualizaLogout: usuario => {
     return new Promise((resolve, reject) => {
       db.run(
-      `
+        `
         UPDATE usuarios
         SET ultimoLogout = ?
         WHERE id = ?
       `,
-      [usuario.ultimoLogout, usuario.id],
-      erro => {
-        if (erro) {
-          return reject('Não foi possível atualizar o último logout');
+        [usuario.ultimoLogout, usuario.id],
+        erro => {
+          if (erro) {
+            return reject('Não foi possível atualizar o último logout');
+          }
+          return resolve();
         }
-        return resolve();
-      })
-    })
+      );
+    });
   },
 
   deleta: usuario => {

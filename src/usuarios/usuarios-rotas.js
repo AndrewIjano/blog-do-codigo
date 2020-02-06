@@ -1,5 +1,4 @@
 const usuariosControlador = require('./usuarios-controlador');
-const passport = require('passport');
 const middlewareAutenticacao = require('./middleware-autenticacao');
 
 module.exports = app => {

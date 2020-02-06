@@ -36,14 +36,14 @@ module.exports = {
   login: (req, res) => {
     const token = criaTokenJWT(req.user);
     res.set('Authorization', token);
-    return res.status(200).send();
+    return res.status(204).send();
   },
 
   logout: (req, res) => {
     const usuario = req.user;
-    usuario.atualizaLogout();
+    usuario.logout();
 
-    res.status(200).send();
+    res.status(205).send();
   },
 
   deleta: async (req, res) => {

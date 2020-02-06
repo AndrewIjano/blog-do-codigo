@@ -13,7 +13,7 @@ class Usuario {
     if (!this.ultimoLogout) {
       this.ultimoLogout = new Date().toJSON();
     }
-    
+
     this.valida();
   }
 
@@ -22,8 +22,7 @@ class Usuario {
     this.campoTamanhoMinimo(senha, 'senha', 8);
     this.campoTamanhoMaximo(senha, 'senha', 64);
 
-    const custoHash = 12;
-    this.senhaHash = await bcrypt.hash(senha, custoHash);
+    this.senhaHash = await Usuario.gerarSenhaHash(senha);
   }
 
   async adiciona() {
@@ -58,7 +57,7 @@ class Usuario {
       );
   }
 
-  async atualizaLogout() {
+  async logout() {
     this.ultimoLogout = new Date().toJSON();
 
     return usuariosDao.atualizaLogout(this);
@@ -82,13 +81,17 @@ class Usuario {
     if (!usuario) {
       return null;
     }
-    
-    return new Usuario(usuario);
 
+    return new Usuario(usuario);
   }
 
   static async buscaUltimoLogout(id) {
     return usuariosDao.buscaUltimoLogout(id);
+  }
+
+  static async gerarSenhaHash(senha) {
+    const custoHash = 12;
+    return bcrypt.hash(senha, custoHash);
   }
 }
 

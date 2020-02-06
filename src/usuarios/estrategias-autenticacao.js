@@ -3,9 +3,23 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const BearerStrategy = require('passport-http-bearer');
 const jwt = require('jsonwebtoken');
-const { InvalidArgumentError, InternalServerError } = require('../../erros');
+const { InvalidArgumentError } = require('../../erros');
 
 const Usuario = require('./usuarios-modelo');
+
+function verificaUsuario(usuario) {
+  if (!usuario) {
+    throw new InvalidArgumentError('Não existe usuário com esse e-mail!');
+  }
+}
+
+async function verificaSenha(senha, senhaHash) {
+  const senhaCorreta = await bcrypt.compare(senha, senhaHash);
+
+  if (!senhaCorreta) {
+    throw new InvalidArgumentError('Login ou senha incorretos');
+  }
+}
 
 module.exports = app => {
   passport.use(
@@ -17,21 +31,8 @@ module.exports = app => {
       async (email, senha, done) => {
         try {
           const usuario = await Usuario.buscaPorEmail(email);
-          if (!usuario) {
-            return done(
-              new InvalidArgumentError('Não existe usuário com esse e-mail!'),
-              false
-            );
-          }
-
-          const senhaCorreta = await bcrypt.compare(senha, usuario.senhaHash);
-
-          if (!senhaCorreta) {
-            return done(
-              new InvalidArgumentError('Login ou senha incorretos'),
-              false
-            );
-          }
+          verificaUsuario(usuario);
+          await verificaSenha(senha, usuario.senhaHash);
 
           return done(null, usuario);
         } catch (erro) {
@@ -46,7 +47,7 @@ module.exports = app => {
       try {
         const payload = jwt.decode(token);
         const ultimoLogout = await Usuario.buscaUltimoLogout(payload.id);
-        
+
         jwt.verify(token, process.env.JWT_KEY + ultimoLogout);
         const usuario = await Usuario.buscaPorId(payload.id);
 
