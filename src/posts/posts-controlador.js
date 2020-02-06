@@ -14,9 +14,10 @@ module.exports = {
           return res.status(500).json({ erro: err });
         });
     } catch (err) {
-      res.status(422).json({erro: err.message});
+      res.status(422).json({ erro: err.message });
     }
   },
+
   lista: (req, res) => {
     Post.lista()
       .then(posts => {

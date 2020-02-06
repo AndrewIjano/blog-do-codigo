@@ -1,11 +1,17 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const { estrategiasAutenticacao } = require('./src/usuarios');
 
 app.use(
   bodyParser.urlencoded({
     extended: true
   })
 );
+
+app.use(cookieParser());
+
+estrategiasAutenticacao(app);
 
 module.exports = app;
