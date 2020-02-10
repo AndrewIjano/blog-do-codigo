@@ -3,8 +3,9 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const BearerStrategy = require('passport-http-bearer');
 const jwt = require('jsonwebtoken');
-const { InvalidArgumentError } = require('../../erros');
 
+const { InvalidArgumentError } = require('../../erros');
+const blacklist = require('../../blacklist');
 const Usuario = require('./usuarios-modelo');
 
 function verificaUsuario(usuario) {
@@ -45,10 +46,12 @@ module.exports = app => {
   passport.use(
     new BearerStrategy(async (token, done) => {
       try {
-        const payload = jwt.decode(token);
-        const ultimoLogout = await Usuario.buscaUltimoLogout(payload.id);
+        const tokenNaBlacklist = await blacklist.buscaToken(token);
+        if (tokenNaBlacklist) {
+          throw new jwt.TokenExpiredError('Token inválido por logout!');
+        }
 
-        jwt.verify(token, process.env.JWT_KEY + ultimoLogout);
+        const payload = jwt.verify(token, process.env.JWT_KEY);
         const usuario = await Usuario.buscaPorId(payload.id);
 
         return done(null, usuario);

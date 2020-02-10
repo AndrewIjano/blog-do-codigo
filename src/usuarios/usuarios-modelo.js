@@ -8,11 +8,6 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
-    this.ultimoLogout = usuario.ultimoLogout;
-
-    if (!this.ultimoLogout) {
-      this.ultimoLogout = new Date().toJSON();
-    }
 
     this.valida();
   }
@@ -57,12 +52,6 @@ class Usuario {
       );
   }
 
-  async logout() {
-    this.ultimoLogout = new Date().toJSON();
-
-    return usuariosDao.atualizaLogout(this);
-  }
-
   async deleta() {
     return usuariosDao.deleta(this);
   }
@@ -83,10 +72,6 @@ class Usuario {
     }
 
     return new Usuario(usuario);
-  }
-
-  static async buscaUltimoLogout(id) {
-    return usuariosDao.buscaUltimoLogout(id);
   }
 
   static async gerarSenhaHash(senha) {

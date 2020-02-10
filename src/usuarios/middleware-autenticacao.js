@@ -9,7 +9,7 @@ module.exports = {
         if (erro && erro.name === 'TokenExpiredError') {
           return res
             .status(400)
-            .send({ erro: erro.message, expiradoEm: erro.expiredAt });
+            .send({ erro: erro.message});
         }
 
         if (erro && erro.name === 'JsonWebTokenError') {
