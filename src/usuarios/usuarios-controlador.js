@@ -18,13 +18,20 @@ module.exports = {
     const { nome, email, senha } = req.body;
 
     try {
-      const usuario = new Usuario({ nome, email });
+      const chaveAutenticacaoDoisFatores = speakeasy.generateSecret().base32;
+
+      const usuario = new Usuario({
+        nome,
+        email,
+        chaveAutenticacaoDoisFatores
+      });
+
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
 
-      const codigo = speakeasy.generateSecret().base32;
-
-      res.status(201).json({codigo: codigo});
+      res
+        .status(201)
+        .json({ chaveAutenticacaoDoisFatores: chaveAutenticacaoDoisFatores });
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(422).json({ erro: erro.message });

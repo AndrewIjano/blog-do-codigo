@@ -48,20 +48,20 @@ module.exports = {
 
   doisFatores: (req, res, next) => {
     if (!req.headers.authorization) {
-      res.status(403);
+      return res.status(403);
     }
 
     const token = req.headers.authorization;
     const tokenValido = speakeasy.totp.verify({
-      secret: 'KVCWCVLGGRAGOTBJGVRXSZZWKNRVMVSYNRJG4VKPNESFGILZJIUQ',
+      secret: req.user.chaveAutenticacaoDoisFatores,
       encoding: 'base32',
       token: token
-    })
+    });
 
-    if (!req.header.authorization) {
-      res.status(400).send({erro: 'Token de autenticação inválido'});  
+    if (!tokenValido) {
+      return res.status(400).send({ erro: 'Token de autenticação inválido' });
     }
 
-  next();
+    next();
   }
 };

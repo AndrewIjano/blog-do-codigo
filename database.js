@@ -15,7 +15,8 @@ const USUARIOS_SCHEMA = `
     nome VARCHAR(40) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senhaHash VARCHAR(255) NOT NULL,
-    ultimoLogout VARCHAR(255) NOT NULL
+    ultimoLogout VARCHAR(255) NOT NULL,
+    chaveAutenticacaoDoisFatores VARCHAR(255) NOT NULL
   )
   `;
 

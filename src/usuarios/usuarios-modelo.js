@@ -9,7 +9,8 @@ class Usuario {
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
     this.ultimoLogout = usuario.ultimoLogout;
-
+    this.chaveAutenticacaoDoisFatores = usuario.chaveAutenticacaoDoisFatores;
+    
     if (!this.ultimoLogout) {
       this.ultimoLogout = new Date().toJSON();
     }
