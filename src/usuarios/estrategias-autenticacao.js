@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt');
 const BearerStrategy = require('passport-http-bearer');
 const jwt = require('jsonwebtoken');
 
-const { InvalidArgumentError } = require('../../erros');
+const { InvalidArgumentError } = require('../erros');
+
 const blacklist = require('../../redis/manipula-blacklist');
 const Usuario = require('./usuarios-modelo');
 

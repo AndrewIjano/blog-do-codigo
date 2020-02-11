@@ -1,5 +1,5 @@
 const Usuario = require('./usuarios-modelo');
-const { InvalidArgumentError, InternalServerError } = require('../../erros');
+const { InvalidArgumentError, InternalServerError } = require('../erros');
 const jwt = require('jsonwebtoken');
 const blacklist = require('../../redis/manipula-blacklist');
 
@@ -23,11 +23,18 @@ module.exports = {
     const { nome, email, senha } = req.body;
 
     try {
-      const usuario = new Usuario({ nome, email });
+      const usuario = new Usuario({
+        nome,
+        email
+      });
+
+      usuario.adicionaChaveAutenticacaoDoisFatores();
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
 
-      res.status(201).json(usuario);
+      res.status(201).json({
+        chaveAutenticacaoDoisFatores: usuario.chaveAutenticacaoDoisFatores
+      });
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(422).json({ erro: erro.message });

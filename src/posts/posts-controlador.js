@@ -1,30 +1,29 @@
 const Post = require('./posts-modelo');
 
 module.exports = {
-  adiciona: (req, res) => {
+  adiciona: async (req, res) => {
     try {
       const post = new Post(req.body);
-
-      post
-        .adiciona()
-        .then(() => {
-          res.redirect('/posts');
-        })
-        .catch(err => {
-          return res.status(500).json({ erro: err });
-        });
-    } catch (err) {
-      res.status(422).json({ erro: err.message });
+      await post.adiciona();
+      
+      res.status(201).send(post);
+    } catch (erro) {
+      if (erro instanceof InvalidArgumentError) {
+        res.status(422).json({ erro: erro.message });
+      } else if (erro instanceof InternalServerError) {
+        res.status(500).json({ erro: erro.message });
+      } else {
+        res.status(500).json({ erro: erro.message });
+      }
     }
   },
 
-  lista: (req, res) => {
-    Post.lista()
-      .then(posts => {
-        res.send(posts);
-      })
-      .catch(err => {
-        return res.status(500).json({ erro: err });
-      });
+  lista: async (req, res) => {
+    try {
+      const posts = await Post.lista();
+      res.send(posts);
+    } catch (erro) {
+      return res.status(500).json({ erro: erro });
+    }
   }
 };

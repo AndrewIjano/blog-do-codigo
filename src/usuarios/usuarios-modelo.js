@@ -1,6 +1,8 @@
 const usuariosDao = require('./usuarios-dao');
-const { InvalidArgumentError } = require('../../erros');
+const { InvalidArgumentError } = require('../erros');
 const bcrypt = require('bcrypt');
+const validacoes = require('../validacoes-comuns');
+const speakeasy = require('speakeasy');
 
 class Usuario {
   constructor(usuario) {
@@ -8,16 +10,21 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
+    this.chaveAutenticacaoDoisFatores = usuario.chaveAutenticacaoDoisFatores;
 
     this.valida();
   }
 
   async adicionaSenha(senha) {
-    this.campoStringNaoNulo(senha, 'senha');
-    this.campoTamanhoMinimo(senha, 'senha', 8);
-    this.campoTamanhoMaximo(senha, 'senha', 64);
+    validacoes.campoStringNaoNulo(senha, 'senha');
+    validacoes.campoTamanhoMinimo(senha, 'senha', 8);
+    validacoes.campoTamanhoMaximo(senha, 'senha', 64);
 
     this.senhaHash = await Usuario.gerarSenhaHash(senha);
+  }
+
+  async adicionaChaveAutenticacaoDoisFatores() {
+    this.chaveAutenticacaoDoisFatores = speakeasy.generateSecret().base32;
   }
 
   async adiciona() {
@@ -29,27 +36,8 @@ class Usuario {
   }
 
   valida() {
-    this.campoStringNaoNulo(this.nome, 'nome');
-    this.campoStringNaoNulo(this.email, 'email');
-  }
-
-  campoStringNaoNulo(valor, nome) {
-    if (typeof valor !== 'string' || valor === 0)
-      throw new InvalidArgumentError(`É necessário preencher o campo ${nome}!`);
-  }
-
-  campoTamanhoMinimo(valor, nome, minimo) {
-    if (valor.length < minimo)
-      throw new InvalidArgumentError(
-        `O campo ${nome} precisa ser maior que ${minimo} caracteres!`
-      );
-  }
-
-  campoTamanhoMaximo(valor, nome, maximo) {
-    if (valor.length > maximo)
-      throw new InvalidArgumentError(
-        `O campo ${nome} precisa ser menor que ${maximo} caracteres!`
-      );
+    validacoes.campoStringNaoNulo(this.nome, 'nome');
+    validacoes.campoStringNaoNulo(this.email, 'email');
   }
 
   async deleta() {
