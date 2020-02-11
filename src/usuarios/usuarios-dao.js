@@ -1,5 +1,5 @@
 const db = require('../../database');
-const { InternalServerError } = require('../../erros');
+const { InternalServerError } = require('../erros');
 
 module.exports = {
   adiciona: usuario => {

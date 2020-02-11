@@ -1,5 +1,6 @@
 const postsDao = require('./posts-dao');
-const { InvalidArgumentError } = require('../../erros');
+const { InvalidArgumentError } = require('../erros');
+const validacoes = require('../validacoes-comuns');
 
 class Post {
   constructor(post) {
@@ -13,15 +14,11 @@ class Post {
   }
 
   valida() {
-    if (typeof this.titulo !== 'string' || this.titulo.length < 5)
-      throw new InvalidArgumentError(
-        'O título precisa ter mais de 5 caracteres!'
-      );
+    validacoes.campoStringNaoNulo(this.titulo, 'título');
+    validacoes.campoTamanhoMinimo(this.titulo, 'título', 5);
 
-    if (typeof this.conteudo !== 'string' || this.conteudo.length > 140)
-      throw new InvalidArgumentError(
-        'O conteúdo do post não pode ter mais de 140 caracteres!'
-      );
+    validacoes.campoStringNaoNulo(this.conteudo, 'conteúdo');
+    validacoes.campoTamanhoMaximo(this.conteudo, 'conteúdo', 140);
   }
 
   static lista() {
