@@ -1,18 +1,8 @@
-const redis = require('redis');
-const blacklist = redis.createClient();
+const blacklist = require('../../redis');
 
 const { promisify } = require('util');
-const getAsync = promisify(blacklist.get).bind(blacklist);
 const scanAsync = promisify(blacklist.scan).bind(blacklist);
 const delAsync = promisify(blacklist.del).bind(blacklist);
-
-const { createHash } = require('crypto');
-
-function geraTokenHash(token) {
-  return createHash('sha256')
-    .update(token)
-    .digest('hex');
-}
 
 function scanChaves(cursor, chaves) {
   return scanAsync(cursor).then(res => {
@@ -41,14 +31,3 @@ async function limpaBlacklist() {
 }
 
 setInterval(limpaBlacklist, 3600 * 24 * 1000);
-
-module.exports = {
-  adicionaToken: (token, dataExp) => {
-    const tokenHash = geraTokenHash(token);
-    blacklist.set(tokenHash, dataExp.toString());
-  },
-
-  buscaToken: token => {
-    return getAsync(geraTokenHash(token));
-  }
-};
