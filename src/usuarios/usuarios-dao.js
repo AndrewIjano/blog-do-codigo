@@ -10,15 +10,13 @@ module.exports = {
             nome,
             email,
             senhaHash,
-            ultimoLogout,
             chaveAutenticacaoDoisFatores
-          ) VALUES (?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?)
         `,
         [
           usuario.nome,
           usuario.email,
           usuario.senhaHash,
-          usuario.ultimoLogout,
           usuario.chaveAutenticacaoDoisFatores
         ],
         erro => {
@@ -67,45 +65,6 @@ module.exports = {
           }
 
           return resolve(usuario);
-        }
-      );
-    });
-  },
-
-  buscaUltimoLogout: id => {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `
-          SELECT ultimoLogout
-          FROM usuarios
-          WHERE id = ?
-        `,
-        [id],
-        (erro, resultado) => {
-          if (erro) {
-            return reject('Não foi possível encontrar o usuário!');
-          }
-
-          return resolve(resultado.ultimoLogout);
-        }
-      );
-    });
-  },
-
-  atualizaLogout: usuario => {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `
-        UPDATE usuarios
-        SET ultimoLogout = ?
-        WHERE id = ?
-      `,
-        [usuario.ultimoLogout, usuario.id],
-        erro => {
-          if (erro) {
-            return reject('Não foi possível atualizar o último logout');
-          }
-          return resolve();
         }
       );
     });
