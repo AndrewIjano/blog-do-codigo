@@ -1,7 +1,10 @@
 const usuariosControlador = require('./usuarios-controlador');
-const middlewareAutenticacao = require('./middleware-autenticacao');
+const middlewareAutenticacao = require('./middlewares-autenticacao');
 
 module.exports = app => {
+  
+  // pode gerar um link primeiro e realizar a autenticacao dois fatores
+  // em outra rota
   app
     .route('/login')
     .post(

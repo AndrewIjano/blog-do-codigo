@@ -10,7 +10,7 @@ class Usuario {
     this.senhaHash = usuario.senhaHash;
     this.ultimoLogout = usuario.ultimoLogout;
     this.chaveAutenticacaoDoisFatores = usuario.chaveAutenticacaoDoisFatores;
-    
+
     if (!this.ultimoLogout) {
       this.ultimoLogout = new Date().toJSON();
     }
@@ -24,6 +24,10 @@ class Usuario {
     this.campoTamanhoMaximo(senha, 'senha', 64);
 
     this.senhaHash = await Usuario.gerarSenhaHash(senha);
+  }
+
+  async adicionaChaveAutenticacaoDoisFatores() {
+    this.chaveAutenticacaoDoisFatores = speakeasy.generateSecret().base32;
   }
 
   async adiciona() {

@@ -50,7 +50,7 @@ module.exports = {
     if (!req.headers.authorization) {
       return res.status(403);
     }
-
+    
     const token = req.headers.authorization;
     const tokenValido = speakeasy.totp.verify({
       secret: req.user.chaveAutenticacaoDoisFatores,
