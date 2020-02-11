@@ -4,8 +4,8 @@ const app = require('./app');
 const port = 3000;
 const db = require('./database');
 
-const blacklist = require('./redis');
-require('./src/blacklist/limpa-blacklist');
+const blacklist = require('./redis/blacklist');
+require('./redis/limpa-blacklist');
 
 const routes = require('./rotas');
 routes(app);

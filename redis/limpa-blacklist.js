@@ -1,4 +1,4 @@
-const blacklist = require('../../redis');
+const blacklist = require('./blacklist');
 
 const { promisify } = require('util');
 const scanAsync = promisify(blacklist.scan).bind(blacklist);
