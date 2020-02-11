@@ -12,10 +12,11 @@ const POSTS_SCHEMA = `
 const USUARIOS_SCHEMA = `
   CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome VARCHAR(40) NOT NULL UNIQUE,
+    nome VARCHAR(40) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senhaHash VARCHAR(255) NOT NULL,
-    ultimoLogout VARCHAR(255) NOT NULL
+    ultimoLogout VARCHAR(255) NOT NULL,
+    chaveAutenticacaoDoisFatores VARCHAR(255) NOT NULL
   )
   `;
 
