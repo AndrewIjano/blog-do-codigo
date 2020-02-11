@@ -1,5 +1,6 @@
 const postsDao = require('./posts-dao');
-const { InvalidArgumentError } = require('../../erros');
+const { InvalidArgumentError } = require('../erros');
+const validacoes = require('../validacoes-comuns');
 
 class Post {
   constructor(post) {
@@ -13,30 +14,11 @@ class Post {
   }
 
   valida() {
-    this.campoStringNaoNulo(this.titulo, 'título');
-    this.campoTamanhoMinimo(this.titulo, 'título', 5);
-    
-    this.campoStringNaoNulo(this.conteudo, 'conteúdo');
-    this.campoTamanhoMaximo(this.conteudo, 'conteúdo', 140);
-  }
+    validacoes.campoStringNaoNulo(this.titulo, 'título');
+    validacoes.campoTamanhoMinimo(this.titulo, 'título', 5);
 
-  campoStringNaoNulo(valor, nome) {
-    if (typeof valor !== 'string' || valor === 0)
-      throw new InvalidArgumentError(`É necessário preencher o campo ${nome}!`);
-  }
-
-  campoTamanhoMinimo(valor, nome, minimo) {
-    if (valor.length < minimo)
-      throw new InvalidArgumentError(
-        `O campo ${nome} precisa ser maior que ${minimo} caracteres!`
-      );
-  }
-
-  campoTamanhoMaximo(valor, nome, maximo) {
-    if (valor.length > maximo)
-      throw new InvalidArgumentError(
-        `O campo ${nome} precisa ser menor que ${maximo} caracteres!`
-      );
+    validacoes.campoStringNaoNulo(this.conteudo, 'conteúdo');
+    validacoes.campoTamanhoMaximo(this.conteudo, 'conteúdo', 140);
   }
 
   static lista() {
