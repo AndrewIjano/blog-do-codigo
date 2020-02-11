@@ -30,4 +30,5 @@ async function limpaBlacklist() {
   });
 }
 
+// Dá pra usar um scheduler 
 setInterval(limpaBlacklist, 3600 * 24 * 1000);
