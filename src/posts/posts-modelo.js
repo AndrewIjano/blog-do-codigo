@@ -1,5 +1,4 @@
 const postsDao = require('./posts-dao');
-const { InvalidArgumentError } = require('../erros');
 const validacoes = require('../validacoes-comuns');
 
 class Post {
