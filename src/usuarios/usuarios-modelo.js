@@ -23,9 +23,9 @@ class Usuario {
   valida() {
     validacoes.campoStringNaoNulo(this.nome, 'nome');
     validacoes.campoStringNaoNulo(this.email, 'email');
-    validacoes.campoStringNaoNulo(senha, 'senha');
-    validacoes.campoTamanhoMinimo(senha, 'senha', 8);
-    validacoes.campoTamanhoMaximo(senha, 'senha', 64);
+    validacoes.campoStringNaoNulo(this.senha, 'senha');
+    validacoes.campoTamanhoMinimo(this.senha, 'senha', 8);
+    validacoes.campoTamanhoMaximo(this.senha, 'senha', 64);
   }
 
   async deleta() {
