@@ -28,7 +28,8 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: 'email',
-      passwordField: 'senha'
+      passwordField: 'senha',
+      session: false
     },
     async (email, senha, done) => {
       try {
