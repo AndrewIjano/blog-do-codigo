@@ -6,7 +6,7 @@ module.exports = app => {
   app.route('/usuario').post(usuariosControlador.adiciona);
 
   app
-    .route('/login')
+    .route('/usuario/login')
     .post(
       passport.authenticate('local', { session: false }),
       usuariosControlador.login
