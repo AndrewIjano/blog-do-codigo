@@ -1,14 +1,14 @@
 class InvalidArgumentError extends Error {
   constructor(mensagem) {
     super(mensagem);
-    this.nome = 'InvalidArgumentError';
+    this.name = 'InvalidArgumentError';
   }
 }
 
 class InternalServerError extends Error {
   constructor(mensagem) {
     super(mensagem);
-    this.nome = 'InternalServerError';
+    this.name = 'InternalServerError';
   }
 }
 
