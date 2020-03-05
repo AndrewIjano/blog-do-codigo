@@ -64,6 +64,22 @@ module.exports = {
     });
   },
 
+  lista: () => {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `
+          SELECT * FROM usuarios
+        `,
+        (erro, usuarios) => {
+          if (erro) {
+            return reject('Erro ao listar usuários');
+          }
+          return resolve(usuarios);
+        }
+      );
+    });
+  },
+
   deleta: usuario => {
     return new Promise((resolve, reject) => {
       db.run(

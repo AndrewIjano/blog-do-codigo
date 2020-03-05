@@ -28,26 +28,31 @@ class Usuario {
     validacoes.campoTamanhoMaximo(this.senha, 'senha', 64);
   }
 
+  
   async deleta() {
     return usuariosDao.deleta(this);
   }
-
+  
   static async buscaPorId(id) {
     const usuario = await usuariosDao.buscaPorId(id);
     if (!usuario) {
       return null;
     }
-
+    
     return new Usuario(usuario);
   }
-
+  
   static async buscaPorEmail(email) {
     const usuario = await usuariosDao.buscaPorEmail(email);
     if (!usuario) {
       return null;
     }
-
+    
     return new Usuario(usuario);
+  }
+
+  static lista() {
+    return usuariosDao.lista();
   }
 }
 

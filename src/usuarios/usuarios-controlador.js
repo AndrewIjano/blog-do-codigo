@@ -26,6 +26,11 @@ module.exports = {
     }
   },
 
+  lista: async (req, res) => {
+    const usuarios = await Usuario.lista();
+    res.json(usuarios);
+  },
+
   deleta: async (req, res) => {
     const usuario = await Usuario.buscaPorId(req.params.id);
     try {
