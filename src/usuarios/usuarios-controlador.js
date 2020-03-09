@@ -7,7 +7,9 @@ function criaTokenJWT(usuario) {
     id: usuario.id
   };
 
-  return jwt.sign(payload, process.env.CHAVE_JWT);
+  return jwt.sign(payload, process.env.CHAVE_JWT, {
+    expiresIn: '5d'
+  });
 }
 
 module.exports = {

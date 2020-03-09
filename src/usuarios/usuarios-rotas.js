@@ -3,28 +3,15 @@ const middlwaresAutenticacao = require('./middlewares-autenticacao');
 
 module.exports = app => {
   app
-    .route('/registra')
+    .route('/usuario')
     .get(usuariosControlador.lista)
-    .post(usuariosControlador.registra);
-
-  app
-    .route('/login')
-    .post(
-      passport.authenticate('local', { session: false }),
-      usuariosControlador.login
-    );
+    .post(usuariosControlador.adiciona);
 
   app
     .route('/usuario/login')
-    .post(
-      middlwaresAutenticacao.local,
-      usuariosControlador.login
-    );
+    .post(middlwaresAutenticacao.local, usuariosControlador.login);
 
   app
     .route('/usuario/:id')
-    .delete(
-      middlwaresAutenticacao.bearer,
-      usuariosControlador.deleta
-    );
+    .delete(middlwaresAutenticacao.bearer, usuariosControlador.deleta);
 };

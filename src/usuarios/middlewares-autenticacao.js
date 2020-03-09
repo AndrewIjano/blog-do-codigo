@@ -29,6 +29,12 @@ module.exports = {
           return res.status(401).send({ erro: erro.message });
         }
 
+        if (erro && erro.name === 'TokenExpiredError') {
+          return res
+            .status(401)
+            .send({ erro: erro.message, expiradoEm: erro.expiredAt });
+        }
+
         if (erro) {
           return res.status(500).send({ erro: erro.message });
         }
