@@ -1,8 +1,6 @@
 const postsControlador = require('./posts-controlador');
 const middlewaresAutenticacao = require('../usuarios/middlewares-autenticacao');
 
-const passport = require('passport');
-
 module.exports = app => {
   app
     .route('/post')

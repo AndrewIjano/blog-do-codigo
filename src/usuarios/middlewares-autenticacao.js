@@ -10,6 +10,10 @@ module.exports = {
           return res.status(401).send({ erro: erro.message });
         }
 
+        if (!usuario && !erro) {
+          return res.status(401).send();
+        }
+
         if (erro) {
           return res.status(500).send({ erro: erro.message });
         }
@@ -33,6 +37,10 @@ module.exports = {
           return res
             .status(401)
             .send({ erro: erro.message, expiradoEm: erro.expiredAt });
+        }
+        
+        if (!usuario && !erro) {
+          return res.status(401).send();
         }
 
         if (erro) {

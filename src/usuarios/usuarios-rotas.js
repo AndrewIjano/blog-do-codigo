@@ -12,6 +12,10 @@ module.exports = app => {
     .post(middlwaresAutenticacao.local, usuariosControlador.login);
 
   app
+    .route('/usuario/logout')
+    .get(middlwaresAutenticacao.bearer, usuariosControlador.logout);
+
+  app
     .route('/usuario/:id')
     .delete(middlwaresAutenticacao.bearer, usuariosControlador.deleta);
 };

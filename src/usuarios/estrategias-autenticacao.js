@@ -10,6 +10,8 @@ const Usuario = require('./usuarios-modelo');
 
 const { InvalidArgumentError } = require('../erros');
 
+const blacklist = require('../../redis/manipula-blacklist');
+
 function verificaUsuario(usuario) {
   if (!usuario) {
     throw new InvalidArgumentError('Não existe usuário com esse e-mail!');
@@ -21,6 +23,13 @@ async function verificaSenha(senha, senhaHash) {
 
   if (!senhaCorreta) {
     throw new InvalidArgumentError('E-mail ou senha incorretos!');
+  }
+}
+
+async function verificaTokenNaBlacklist(token) {
+  const tokenNaBlacklist = blacklist.contemToken(token);
+  if (tokenNaBlacklist) {
+    throw new jwt.TokenExpiredError('Token inválido por logout!');
   }
 }
 
@@ -48,6 +57,7 @@ passport.use(
 passport.use(
   new BearerStrategy(async (token, done) => {
     try {
+      await verificaTokenNaBlacklist(token);
       const payload = jwt.verify(token, process.env.CHAVE_JWT);
 
       const usuario = await Usuario.buscaPorId(payload.id);
