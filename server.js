@@ -5,6 +5,7 @@ const port = 3000;
 const db = require('./database');
 
 require('./redis/blacklist');
+require('./redis/limpa-blacklist');
 
 const routes = require('./rotas');
 routes(app);
