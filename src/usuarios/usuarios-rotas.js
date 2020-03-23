@@ -8,6 +8,13 @@ module.exports = app => {
     .post(usuariosControlador.adiciona);
 
   app
+    .route('/usuario/login/:id')
+    .post(
+      middlwaresAutenticacao.doisFatores,
+      usuariosControlador.segundaEtapaAutenticacao
+    );
+    
+  app
     .route('/usuario/login')
     .post(middlwaresAutenticacao.local, usuariosControlador.login);
 

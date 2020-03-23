@@ -9,12 +9,19 @@ module.exports = {
           INSERT INTO usuarios (
             nome,
             email,
-            senhaHash
-          ) VALUES (?, ?, ?)
+            senhaHash,
+            chaveAutenticacaoDoisFatores
+          ) VALUES (?, ?, ?, ?)
         `,
-        [usuario.nome, usuario.email, usuario.senhaHash],
+        [
+          usuario.nome,
+          usuario.email,
+          usuario.senhaHash,
+          usuario.chaveAutenticacaoDoisFatores
+        ],
         erro => {
           if (erro) {
+            console.log(erro);
             reject(new InternalServerError('Erro ao adicionar o usuário!'));
           }
 

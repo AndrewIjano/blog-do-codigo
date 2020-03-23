@@ -32,9 +32,10 @@ module.exports = {
       });
 
       await usuario.adicionaSenha(senha);
+      usuario.adicionaChaveAutenticacaoDoisFatores();
       await usuario.adiciona();
 
-      res.status(201).json();
+      res.status(201).json({ chaveTOTP: usuario.chaveAutenticacaoDoisFatores });
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(422).json({ erro: erro.message });
@@ -52,6 +53,12 @@ module.exports = {
   },
 
   login: (req, res) => {
+    const endereco = '/usuario/login/' + req.user.id;
+
+    res.status(307).json({ endereco: endereco });
+  },
+
+  segundaEtapaAutenticacao: (req, res) => {
     const token = criaTokenJWT(req.user);
     res.set('Authorization', token);
     res.status(204).send();
