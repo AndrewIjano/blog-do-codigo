@@ -2,21 +2,18 @@ const usuariosControlador = require('./usuarios-controlador');
 const middlewaresAutenticacao = require('./middlewares-autenticacao');
 
 module.exports = app => {
-  
-  // pode gerar um link primeiro e realizar a autenticacao dois fatores
-  // em outra rota
   app
-    .route('/login')
-    .post(
-      [middlewaresAutenticacao.local, middlewaresAutenticacao.doisFatores],
-      usuariosControlador.login
-    );
-
-  app.route('/registra').post(usuariosControlador.registra);
+    .route('/usuario/login')
+    .post(middlewaresAutenticacao.local, usuariosControlador.login);
 
   app
-    .route('/logout')
+    .route('/usuario/logout')
     .get(middlewaresAutenticacao.bearer, usuariosControlador.logout);
+
+  app
+    .route('/usuario')
+    .post(usuariosControlador.adiciona)
+    .get(usuariosControlador.lista);
 
   app
     .route('/usuario/:id')

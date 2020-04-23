@@ -14,28 +14,17 @@ const USUARIOS_SCHEMA = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(40) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    senhaHash VARCHAR(255) NOT NULL,
-    chaveAutenticacaoDoisFatores VARCHAR(255) NOT NULL
+    senhaHash VARCHAR(255) NOT NULL
   )
-  `;
-
-const COMENTARIOS_SCHEMA = `
-    CREATE TABLE IF NOT EXISTS comentarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      post_id INTEGER REFERENCES post(id),
-      usuario_id INTEGER REFERENCES usuario(id),
-      conteudo VARCHAR(140)
-    )
   `;
 
 db.serialize(() => {
   db.run('PRAGMA foreign_keys=ON');
   db.run(POSTS_SCHEMA);
   db.run(USUARIOS_SCHEMA);
-  db.run(COMENTARIOS_SCHEMA);
 
   db.each('SELECT * FROM usuarios', (err, usuario) => {
-    console.log('Usuario: ');
+    console.log('Usuarios: ');
     console.log(usuario);
   });
 });

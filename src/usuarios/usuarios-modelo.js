@@ -1,8 +1,7 @@
 const usuariosDao = require('./usuarios-dao');
 const { InvalidArgumentError } = require('../erros');
-const bcrypt = require('bcrypt');
 const validacoes = require('../validacoes-comuns');
-const speakeasy = require('speakeasy');
+const bcrypt = require('bcrypt');
 
 class Usuario {
   constructor(usuario) {
@@ -10,21 +9,8 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
-    this.chaveAutenticacaoDoisFatores = usuario.chaveAutenticacaoDoisFatores;
 
     this.valida();
-  }
-
-  async adicionaSenha(senha) {
-    validacoes.campoStringNaoNulo(senha, 'senha');
-    validacoes.campoTamanhoMinimo(senha, 'senha', 8);
-    validacoes.campoTamanhoMaximo(senha, 'senha', 64);
-
-    this.senhaHash = await Usuario.gerarSenhaHash(senha);
-  }
-
-  async adicionaChaveAutenticacaoDoisFatores() {
-    this.chaveAutenticacaoDoisFatores = speakeasy.generateSecret().base32;
   }
 
   async adiciona() {
@@ -33,6 +19,14 @@ class Usuario {
     }
 
     return usuariosDao.adiciona(this);
+  }
+
+  async adicionaSenha(senha) {
+    validacoes.campoStringNaoNulo(senha, 'senha');
+    validacoes.campoTamanhoMinimo(senha, 'senha', 8);
+    validacoes.campoTamanhoMaximo(senha, 'senha', 64);
+
+    this.senhaHash = await Usuario.gerarSenhaHash(senha);
   }
 
   valida() {
@@ -62,7 +56,11 @@ class Usuario {
     return new Usuario(usuario);
   }
 
-  static async gerarSenhaHash(senha) {
+  static lista() {
+    return usuariosDao.lista();
+  }
+
+  static gerarSenhaHash(senha) {
     const custoHash = 12;
     return bcrypt.hash(senha, custoHash);
   }

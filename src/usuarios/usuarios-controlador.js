@@ -1,5 +1,6 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
+
 const jwt = require('jsonwebtoken');
 const blacklist = require('../../redis/manipula-blacklist');
 
@@ -8,18 +9,12 @@ function criaTokenJWT(usuario) {
     id: usuario.id
   };
 
-  return jwt.sign(payload, process.env.JWT_KEY, {
-    expiresIn: '5d'
-  });
-}
-
-function adicionaTokenBlacklist(token) {
-  const dataExp = jwt.decode(token, process.env.JWT_KEY).exp;
-  blacklist.adicionaToken(token, dataExp);
+  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
+  return token;
 }
 
 module.exports = {
-  registra: async (req, res) => {
+  adiciona: async (req, res) => {
     const { nome, email, senha } = req.body;
 
     try {
@@ -28,13 +23,11 @@ module.exports = {
         email
       });
 
-      usuario.adicionaChaveAutenticacaoDoisFatores();
       await usuario.adicionaSenha(senha);
+
       await usuario.adiciona();
 
-      res.status(201).json({
-        chaveAutenticacaoDoisFatores: usuario.chaveAutenticacaoDoisFatores
-      });
+      res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(422).json({ erro: erro.message });
@@ -52,24 +45,23 @@ module.exports = {
     res.status(204).send();
   },
 
-  logout: (req, res) => {
+  logout: async (req, res) => {
     try {
-      const token = req.headers.authorization.split(' ')[1];
-      adicionaTokenBlacklist(token);
-      res.status(205).send();
+      const token = req.token;
+      await blacklist.adiciona(token);
+      res.status(204).send();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
   },
 
-  deleta: async (req, res) => {
-    if (req.user.id != req.params.id) {
-      return res
-        .status(403)
-        .send('Você precisa entrar como esse usuário para isso!');
-    }
+  lista: async (req, res) => {
+    const usuarios = await Usuario.lista();
+    res.json(usuarios);
+  },
 
-    const usuario = req.user;
+  deleta: async (req, res) => {
+    const usuario = await Usuario.buscaPorId(req.params.id);
     try {
       await usuario.deleta();
       res.status(200).send();

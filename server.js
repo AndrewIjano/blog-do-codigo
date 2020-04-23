@@ -1,11 +1,9 @@
-require('dotenv').config();
+require('dotenv').config()
 
 const app = require('./app');
 const port = 3000;
 const db = require('./database');
-
-const blacklist = require('./redis/blacklist');
-require('./redis/limpa-blacklist');
+require('./redis/blacklist');
 
 const routes = require('./rotas');
 routes(app);

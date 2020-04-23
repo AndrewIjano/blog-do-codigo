@@ -9,16 +9,10 @@ module.exports = {
           INSERT INTO usuarios (
             nome,
             email,
-            senhaHash,
-            chaveAutenticacaoDoisFatores
-          ) VALUES (?, ?, ?, ?)
+            senhaHash
+          ) VALUES (?, ?, ?)
         `,
-        [
-          usuario.nome,
-          usuario.email,
-          usuario.senhaHash,
-          usuario.chaveAutenticacaoDoisFatores
-        ],
+        [usuario.nome, usuario.email, usuario.senhaHash],
         erro => {
           if (erro) {
             reject(new InternalServerError('Erro ao adicionar o usuário!'));
@@ -65,6 +59,22 @@ module.exports = {
           }
 
           return resolve(usuario);
+        }
+      );
+    });
+  },
+
+  lista: () => {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `
+          SELECT * FROM usuarios
+        `,
+        (erro, usuarios) => {
+          if (erro) {
+            return reject('Erro ao listar usuários');
+          }
+          return resolve(usuarios);
         }
       );
     });
