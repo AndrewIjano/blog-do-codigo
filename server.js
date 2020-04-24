@@ -8,4 +8,4 @@ require('./redis/blacklist');
 const routes = require('./rotas');
 routes(app);
 
-app.listen(port, () => console.log(`App listening on port ${port}`));
+app.listen(port);
