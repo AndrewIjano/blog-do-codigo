@@ -13,6 +13,33 @@ function criaTokenJWT(usuario) {
   return token;
 }
 
+async function encripta(payload, chave) {
+  return payload;
+}
+
+async function criaRefreshToken(usuario) {
+  const chave = 'senha-secreta';
+  const nonce = 'aaaaa';
+  const payload = {
+    id: usuario.id,
+    exp: Date.now() + 1000*60*60*24*5,
+    nonce
+  }
+
+  const refreshToken = await encripta(payload, chave);
+  return refreshToken;
+}
+
+async function decripta(token) {
+  return token;
+}
+
+async function verificaRefreshToken(token) {
+  const payload = await decripta(token);
+  return payload;
+}
+
+
 module.exports = {
   async adiciona(req, res) {
     const { nome, email, senha } = req.body;
