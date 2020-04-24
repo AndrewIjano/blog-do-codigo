@@ -42,14 +42,14 @@ module.exports = {
   login: (req, res) => {
     const token = criaTokenJWT(req.user);
     res.set('Authorization', token);
-    res.status(204).send();
+    res.status(204).json();
   },
 
   logout: async (req, res) => {
     try {
       const token = req.token;
       await blacklist.adiciona(token);
-      res.status(204).send();
+      res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
@@ -64,7 +64,7 @@ module.exports = {
     const usuario = await Usuario.buscaPorId(req.params.id);
     try {
       await usuario.deleta();
-      res.status(200).send();
+      res.status(200).json();
     } catch (erro) {
       res.status(500).json({ erro: erro });
     }
