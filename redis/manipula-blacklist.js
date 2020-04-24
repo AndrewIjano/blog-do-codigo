@@ -14,13 +14,13 @@ function geraTokenHash(token) {
 }
 
 module.exports = {
-  adiciona: async token => {
+  async adiciona(token) {
     const dataExpiracao = jwt.decode(token).exp;
     const tokenHash = geraTokenHash(token);
     await setAsync(tokenHash, '');
     blacklist.expireat(tokenHash, dataExpiracao);
   },
-  contemToken: async token => {
+  async contemToken(token) {
     const tokenHash = geraTokenHash(token);
     const resultado = await existsAsync(tokenHash);
     return resultado === 1;

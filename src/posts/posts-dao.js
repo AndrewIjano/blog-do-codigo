@@ -6,7 +6,7 @@ const dbRun = promisify(db.run).bind(db);
 const dbAll = promisify(db.all).bind(db);
 
 module.exports = {
-  adiciona: async post => {
+  async adiciona(post) {
     try {
       await dbRun(`INSERT INTO posts (titulo, conteudo) VALUES (?, ?)`, [
         post.titulo,
@@ -17,7 +17,7 @@ module.exports = {
     }
   },
 
-  lista: async () => {
+  async lista() {
     try {
       return await dbAll(`SELECT * FROM posts`);
     } catch (erro) {

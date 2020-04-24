@@ -7,7 +7,7 @@ const dbGet = promisify(db.get).bind(db);
 const dbAll = promisify(db.all).bind(db);
 
 module.exports = {
-  adiciona: async usuario => {
+  async adiciona(usuario) {
     try {
       await dbRun(
         `INSERT INTO usuarios (nome, email, senhaHash) VALUES (?, ?, ?)`,
@@ -19,7 +19,7 @@ module.exports = {
     }
   },
 
-  buscaPorId: async id => {
+  async buscaPorId(id) {
     try {
       return await dbGet(`SELECT * FROM usuarios WHERE id = ?`, [id]);
     } catch (erro) {
@@ -27,7 +27,7 @@ module.exports = {
     }
   },
 
-  buscaPorEmail: async email => {
+  async buscaPorEmail(email) {
     try {
       return await dbGet(`SELECT * FROM usuarios WHERE email = ?`, [email]);
     } catch (erro) {
@@ -35,7 +35,7 @@ module.exports = {
     }
   },
 
-  lista: async () => {
+  async lista() {
     try {
       return await dbAll(`SELECT * FROM usuarios`);
     } catch (erro) {
@@ -43,7 +43,7 @@ module.exports = {
     }
   },
 
-  deleta: async usuario => {
+  async deleta(usuario) {
     try {
       await dbRun(`DELETE FROM usuarios WHERE id = ?`, [usuario.id]);
     } catch (erro) {
