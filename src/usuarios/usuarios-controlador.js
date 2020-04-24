@@ -56,12 +56,16 @@ module.exports = {
   },
 
   async lista(req, res) {
-    const usuarios = await Usuario.lista();
-    res.json(usuarios);
+    try {
+      const usuarios = await Usuario.lista();
+      res.json(usuarios);
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message });
+    }
   },
 
   async deleta(req, res) {
-    const usuario = await Usuario.buscaPorId(req.params.id);
+    const usuario = req.usuario;
     try {
       await usuario.deleta();
       res.status(200).json();
