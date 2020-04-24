@@ -14,7 +14,6 @@ module.exports = {
         [usuario.nome, usuario.email, usuario.senhaHash]
       );
     } catch (erro) {
-      console.log(erro);
       throw new InternalServerError('Erro ao adicionar o usuário!');
     }
   },
