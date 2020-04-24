@@ -65,8 +65,8 @@ module.exports = {
   },
 
   async deleta(req, res) {
-    const usuario = req.usuario;
     try {
+      const usuario = await Usuario.buscaPorId(req.params.id);
       await usuario.deleta();
       res.status(200).json();
     } catch (erro) {
