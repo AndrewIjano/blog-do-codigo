@@ -15,8 +15,6 @@ function criaTokenJWT(usuario) {
 }
 
 function encripta(payload, chave) {
-  chave = crypto.scryptSync(chave, 'salt', 32);
-  console.log(chave);
   // iv: initialization vector
   const vetorInicializacao = crypto.randomBytes(16);
   const encriptador = crypto.createCipheriv(
@@ -24,50 +22,60 @@ function encripta(payload, chave) {
     chave,
     vetorInicializacao
   );
-  const payloadEncriptado =
-    encriptador.update(payload, 'utf8') + encriptador.final();
+
+  const payloadEncriptado = Buffer.concat([
+    encriptador.update(payload, 'utf8'),
+    encriptador.final()
+  ]);
+
   const tag = encriptador.getAuthTag();
-  const refreshToken = JSON.stringify({
-    payloadEncriptado,
-    tag,
-    vetorInicializacao
-  });
-  return Buffer.from(refreshToken).toString('base64');
+
+  // dá pra fazer sem .map() nem Buffer.concat() mas não fica tão simétrico com o decripta
+  // e essa forma facilita pra adicionar elementos no refresh token
+  const refreshToken = [payloadEncriptado, tag, vetorInicializacao]
+    .map(item => item.toString('hex'))
+    .join('.');
+
+  return refreshToken;
 }
 
 function decripta(token, chave) {
-  chave = crypto.scryptSync(chave, 'salt', 32);
-  console.log(chave);
-  const { payloadEncriptado, tag, vetorInicializacao } = JSON.parse(
-    Buffer.from(token, 'base64')
-  );
+  const tokenDividido = token.split('.').map(item => Buffer.from(item, 'hex'));
+  // talvez instanciar Buffer em cada um primeiro e depois refatorar
+
+  const [payloadEncriptado, tag, vetorInicializacao] = tokenDividido;
+
   const decriptador = crypto.createDecipheriv(
     'aes-256-gcm',
     chave,
-    Buffer.from(vetorInicializacao)
+    vetorInicializacao
   );
-  decriptador.setAuthTag(Buffer.from(tag));
+  decriptador.setAuthTag(tag);
 
-  const payload = decriptador.update(payloadEncriptado) + decriptador.final();
+  const payload =
+    decriptador.update(payloadEncriptado, 'utf8') + decriptador.final('utf8');
 
   return payload;
 }
 
 function criaRefreshToken(usuario) {
-  const chave = 'senha-secreta';
-  const nonce = 'aaaaa';
   const payload = JSON.stringify({
     id: usuario.id,
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 5,
-    nonce
+    exp: Date.now() + 1000 * 60 * 60 * 24 * 5
   });
-
+  // console.log(require('crypto').randomBytes(22).toString('base64'))
+  // string de 32 caracteres
+  const chave = process.env.CHAVE_REFRESH_TOKEN;
   const refreshToken = encripta(payload, chave);
   return refreshToken;
 }
 
 function verificaRefreshToken(token) {
-  const chave = 'senha-secreta';
+  if (!token) {
+    throw new InvalidArgumentError('Refresh token inválido');
+  }
+
+  const chave = process.env.CHAVE_REFRESH_TOKEN;
   const payload = decripta(token, chave);
   return payload;
 }
@@ -98,12 +106,31 @@ module.exports = {
     }
   },
 
-  async login(req, res) {
+  atualizaToken(req, res) {
+    try {
+      const refreshToken = req.body.refreshToken;
+      const payload = verificaRefreshToken(refreshToken);
+
+      // talvez dê pra refatorar isso?
+      const accessToken = criaTokenJWT(payload);
+      const novoRefreshToken = criaRefreshToken(payload);
+      res.set('Authorization', accessToken);
+      res.status(200).json({ refreshToken: novoRefreshToken });
+    } catch (erro) {
+      if (erro instanceof InvalidArgumentError) {
+        res.status(401).json({ erro: erro.message });
+      } else {
+        res.status(500).json({ erro: erro.message });
+      }
+    }
+  },
+
+  login(req, res) {
     try {
       const accessToken = criaTokenJWT(req.user);
       const refreshToken = criaRefreshToken(req.user);
       res.set('Authorization', accessToken);
-      res.status(200).json({ refreshToken: refreshToken });
+      res.status(200).json({ refreshToken });
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
