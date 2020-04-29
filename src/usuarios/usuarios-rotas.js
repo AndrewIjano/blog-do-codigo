@@ -5,6 +5,10 @@ module.exports = app => {
   app.route('/usuario/atualiza_token').post(usuariosControlador.atualizaToken);
 
   app
+    .route('/usuario/confirma_email/:token')
+    .get(usuariosControlador.confirmaEmail);
+
+  app
     .route('/usuario/login')
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 

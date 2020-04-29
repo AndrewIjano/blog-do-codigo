@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const blacklist = require('../../redis/manipula-blacklist');
 const crypto = require('crypto');
 
+const nodemailer = require('nodemailer');
+
 function criaTokenJWT(usuario) {
   const payload = {
     id: usuario.id
@@ -86,6 +88,26 @@ async function verificaRefreshToken(token) {
   return payload;
 }
 
+async function enviaEmailConfirmacao(email) {
+  // faz o curso com a conta teste + 'para saber mais' com dicas para produção?
+
+  const contaTeste = await nodemailer.createTestAccount();
+
+  const transportador = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    auth: contaTeste
+  });
+
+  const info = await transportador.sendMail({
+    from: 'noreply@blogdocodigo.com.br',
+    to: email,
+    subject: 'Confirmação de e-mail',
+    text: 'confirme aqui!!'
+  });
+
+  console.log('URL:' + nodemailer.getTestMessageUrl(info));
+}
+
 module.exports = {
   async adiciona(req, res) {
     const { nome, email, senha } = req.body;
@@ -93,12 +115,16 @@ module.exports = {
     try {
       const usuario = new Usuario({
         nome,
-        email
+        email,
+        emailConfirmado: false
       });
 
       await usuario.adicionaSenha(senha);
 
       await usuario.adiciona();
+
+      // sem await a request não trava mas não sei como tratar eventuais erros
+      enviaEmailConfirmacao(email);
 
       res.status(201).json();
     } catch (erro) {
@@ -109,6 +135,18 @@ module.exports = {
       } else {
         res.status(500).json({ erro: erro.message });
       }
+    }
+  },
+
+  async confirmaEmail(req, res) {
+    try {
+      // apenas um teste
+      // o id será recuperado do token que estará na URL
+      const usuario = await Usuario.buscaPorId(req.params.token);
+      await usuario.confirmaEmail();
+      res.status(200).json();
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message });
     }
   },
 
