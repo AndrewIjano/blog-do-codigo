@@ -7,6 +7,10 @@ module.exports = app => {
     .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
 
   app
+    .route('/usuario/confirma_email/:token')
+    .get(usuariosControlador.confirmaEmail);
+
+  app
     .route('/usuario/login')
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 
