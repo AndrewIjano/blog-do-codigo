@@ -58,10 +58,12 @@ function decripta(token, chave) {
   return payload;
 }
 
+// É possível criar mecanismos para detectar roubo de refresh token
 function criaRefreshToken(usuario) {
+  const cincoDiasEmMilissegundos = 1000 * 60 * 60 * 24 * 5;
   const payload = JSON.stringify({
     id: usuario.id,
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 5
+    exp: Date.now() + cincoDiasEmMilissegundos
   });
   // console.log(require('crypto').randomBytes(22).toString('base64'))
   // string de 32 caracteres
@@ -70,13 +72,18 @@ function criaRefreshToken(usuario) {
   return refreshToken;
 }
 
-function verificaRefreshToken(token) {
+async function verificaRefreshToken(token) {
   if (!token) {
     throw new InvalidArgumentError('Refresh token inválido');
   }
 
   const chave = process.env.CHAVE_REFRESH_TOKEN;
-  const payload = decripta(token, chave);
+  const payload = JSON.parse(decripta(token, chave));
+  
+  if (payload.exp < Date.now()) {
+    throw new InvalidArgumentError('Refresh token expirado');
+  }
+
   return payload;
 }
 
@@ -106,14 +113,16 @@ module.exports = {
     }
   },
 
-  atualizaToken(req, res) {
+  async atualizaToken(req, res) {
     try {
       const refreshToken = req.body.refreshToken;
-      const payload = verificaRefreshToken(refreshToken);
+      const payload = await verificaRefreshToken(refreshToken);
 
       // talvez dê pra refatorar isso?
       const accessToken = criaTokenJWT(payload);
       const novoRefreshToken = criaRefreshToken(payload);
+
+      // Precisa invalidar o refreshToken antigo
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken: novoRefreshToken });
     } catch (erro) {
