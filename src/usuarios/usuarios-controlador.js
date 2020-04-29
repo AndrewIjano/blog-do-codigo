@@ -79,7 +79,6 @@ async function verificaRefreshToken(token) {
 
   const chave = process.env.CHAVE_REFRESH_TOKEN;
   const payload = JSON.parse(decripta(token, chave));
-
   if (payload.exp < Date.now()) {
     throw new InvalidArgumentError('Refresh token expirado');
   }
