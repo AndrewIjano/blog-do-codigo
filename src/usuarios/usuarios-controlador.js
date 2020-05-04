@@ -3,6 +3,8 @@ const { InvalidArgumentError, InternalServerError } = require('../erros');
 
 const jwt = require('jsonwebtoken');
 const blacklist = require('../../redis/manipula-blacklist');
+const refreshTokens = require('../../redis/manipula-refresh-tokens');
+
 const crypto = require('crypto');
 
 function criaTokenJWT(usuario) {
@@ -14,61 +16,14 @@ function criaTokenJWT(usuario) {
   return token;
 }
 
-function encripta(payload, chave) {
-  // iv: initialization vector
-  const vetorInicializacao = crypto.randomBytes(16);
-  const encriptador = crypto.createCipheriv(
-    'aes-256-gcm',
-    chave,
-    vetorInicializacao
-  );
-
-  const payloadEncriptado = Buffer.concat([
-    encriptador.update(payload, 'utf8'),
-    encriptador.final()
-  ]);
-
-  const tag = encriptador.getAuthTag();
-
-  // dá pra fazer sem .map() nem Buffer.concat() mas não fica tão simétrico com o decripta
-  // e essa forma facilita pra adicionar elementos no refresh token
-  const refreshToken = [payloadEncriptado, tag, vetorInicializacao]
-    .map(item => item.toString('hex'))
-    .join('.');
-
-  return refreshToken;
-}
-
-function decripta(token, chave) {
-  const tokenDividido = token.split('.').map(item => Buffer.from(item, 'hex'));
-  // talvez instanciar Buffer em cada um primeiro e depois refatorar
-
-  const [payloadEncriptado, tag, vetorInicializacao] = tokenDividido;
-
-  const decriptador = crypto.createDecipheriv(
-    'aes-256-gcm',
-    chave,
-    vetorInicializacao
-  );
-  decriptador.setAuthTag(tag);
-
-  const payload =
-    decriptador.update(payloadEncriptado, 'utf8') + decriptador.final('utf8');
-
-  return payload;
-}
-
 // É possível criar mecanismos para detectar roubo de refresh token
 function criaRefreshToken(usuario) {
+  const refreshToken = crypto.randomBytes(24).toString('hex');
+
   const cincoDiasEmMilissegundos = 1000 * 60 * 60 * 24 * 5;
-  const payload = JSON.stringify({
-    id: usuario.id,
-    exp: Date.now() + cincoDiasEmMilissegundos
-  });
-  // console.log(require('crypto').randomBytes(22).toString('base64'))
-  // string de 32 caracteres
-  const chave = process.env.CHAVE_REFRESH_TOKEN;
-  const refreshToken = encripta(payload, chave);
+  const dataExpiracao = Date.now() + cincoDiasEmMilissegundos;
+  refreshTokens.adiciona(refreshToken, usuario.id, dataExpiracao);
+
   return refreshToken;
 }
 
@@ -77,13 +32,13 @@ async function verificaRefreshToken(token) {
     throw new InvalidArgumentError('Refresh token inválido');
   }
 
-  const chave = process.env.CHAVE_REFRESH_TOKEN;
-  const payload = JSON.parse(decripta(token, chave));
-  if (payload.exp < Date.now()) {
-    throw new InvalidArgumentError('Refresh token expirado');
-  }
+  const id = await refreshTokens.buscaId(token);
 
-  return payload;
+  // Essas verificações repetidas estão certas?
+  if (!id) {
+    throw new InvalidArgumentError('Refresh token inválido');
+  }
+  return id;
 }
 
 module.exports = {
@@ -115,13 +70,15 @@ module.exports = {
   async atualizaToken(req, res) {
     try {
       const refreshToken = req.body.refreshToken;
-      const payload = await verificaRefreshToken(refreshToken);
+      const id = await verificaRefreshToken(refreshToken);
 
       // talvez dê pra refatorar isso?
-      const accessToken = criaTokenJWT(payload);
-      const novoRefreshToken = criaRefreshToken(payload);
+      const accessToken = criaTokenJWT({ id });
+      const novoRefreshToken = criaRefreshToken({ id });
 
-      // Precisa invalidar o refreshToken antigo
+      // Invalida refresh token antigo
+      refreshTokens.deleta(refreshToken);
+
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken: novoRefreshToken });
     } catch (erro) {
@@ -133,7 +90,7 @@ module.exports = {
     }
   },
 
-  login(req, res) {
+  async login(req, res) {
     try {
       const accessToken = criaTokenJWT(req.user);
       const refreshToken = criaRefreshToken(req.user);
