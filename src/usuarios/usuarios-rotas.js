@@ -5,8 +5,8 @@ module.exports = app => {
   app.route('/usuario/atualiza_token').post(usuariosControlador.atualizaToken);
 
   app
-    .route('/usuario/confirma_email/:token')
-    .get(usuariosControlador.confirmaEmail);
+    .route('/usuario/verifica_email/:token')
+    .get(usuariosControlador.verificaEmail);
 
   app
     .route('/usuario/login')
