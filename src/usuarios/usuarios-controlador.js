@@ -2,7 +2,14 @@ const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 const tokens = require('./tokens-autenticacao');
 
-async function enviaEmailConfirmacao(email) {
+function geraEndereco(id) {
+  const payload = {id}
+  const token = jwt.sign({ id }, process.env.CHAVE_JWT, { expiresIn: '1h' });
+  const baseURL = process.env.BASE_URL;
+  return `${baseURL}/usuario/verifica_email/${token}`;
+}
+
+async function enviaEmailverificacao(usuario) {
   // faz o curso com a conta teste + 'para saber mais' com dicas para produção?
 
   const contaTeste = await nodemailer.createTestAccount();
@@ -12,13 +19,14 @@ async function enviaEmailConfirmacao(email) {
     auth: contaTeste
   });
 
+  const endereco = geraEndereco(usuario.id);
   const info = await transportador.sendMail({
-    from: 'noreply@blogdocodigo.com.br',
-    to: email,
-    subject: 'Confirmação de e-mail',
-    text: 'confirme aqui!!'
+    from: '"Blog do Código" <noreply@blogdocodigo.com.br>',
+    to: usuario.email,
+    subject: 'verificação de e-mail',
+    text: `Olá! Confirme seu e-mail aqui: ${endereco}.`,
+    html: `Olá! Confirme seu e-mail <a href="${endereco}">aqui</a>.`
   });
-
   console.log('URL:' + nodemailer.getTestMessageUrl(info));
 }
 
@@ -30,7 +38,7 @@ module.exports = {
       const usuario = new Usuario({
         nome,
         email,
-        emailConfirmado: false
+        emailverificado: false
       });
 
       await usuario.adicionaSenha(senha);
@@ -38,7 +46,7 @@ module.exports = {
       await usuario.adiciona();
 
       // sem await a request não trava mas não sei como tratar eventuais erros
-      enviaEmailConfirmacao(email);
+      enviaEmailverificacao(usuario).catch(console.error);
 
       res.status(201).json();
     } catch (erro) {
@@ -52,12 +60,11 @@ module.exports = {
     }
   },
 
-  async confirmaEmail(req, res) {
+  async verificaEmail(req, res) {
     try {
-      // apenas um teste
-      // o id será recuperado do token que estará na URL
-      const usuario = await Usuario.buscaPorId(req.params.token);
-      await usuario.confirmaEmail();
+      const payload = jwt.verify(req.params.token, process.env.CHAVE_JWT);
+      const usuario = await Usuario.buscaPorId(payload.id);
+      await usuario.verificaEmail();
       res.status(200).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });

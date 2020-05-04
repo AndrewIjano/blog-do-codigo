@@ -10,13 +10,13 @@ module.exports = {
   async adiciona(usuario) {
     try {
       await dbRun(
-        `INSERT INTO usuarios (nome, email, senhaHash, emailConfirmado) 
+        `INSERT INTO usuarios (nome, email, senhaHash, emailVerificado) 
         VALUES (?, ?, ?, ?)`,
         [
           usuario.nome,
           usuario.email,
           usuario.senhaHash,
-          usuario.emailConfirmado
+          usuario.emailVerificado
         ]
       );
     } catch (erro) {
@@ -48,9 +48,9 @@ module.exports = {
     }
   },
 
-  async modificaEmailConfirmado(usuario, novoEstado) {
+  async modificaEmailVerificado(usuario, novoEstado) {
     try {
-      await dbRun(`UPDATE usuarios SET emailConfirmado = ? WHERE id = ?`, [
+      await dbRun(`UPDATE usuarios SET emailVerificado = ? WHERE id = ?`, [
         novoEstado,
         usuario.id
       ]);
