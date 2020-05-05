@@ -3,6 +3,7 @@ const { InvalidArgumentError, InternalServerError } = require('../erros');
 
 const jwt = require('jsonwebtoken');
 const blacklist = require('../../redis/manipula-blacklist');
+const tokensAtualizaSenha = require('../../redis/tokens-atualiza-senha');
 const crypto = require('crypto');
 
 const nodemailer = require('nodemailer');
@@ -88,16 +89,50 @@ async function verificaRefreshToken(token) {
   return payload;
 }
 
-function geraEndereco(id) {
-  const payload = {id}
-  const token = jwt.sign({ id }, process.env.CHAVE_JWT, { expiresIn: '1h' });
+function geraEndereco(token, url) {
   const baseURL = process.env.BASE_URL;
-  return `${baseURL}/usuario/verifica_email/${token}`;
+  return `${baseURL}${url}/${token}`;
 }
 
-async function enviaEmailverificacao(usuario) {
-  // faz o curso com a conta teste + 'para saber mais' com dicas para produção?
+function geraEnderecoVerificaEmail(id) {
+  const payload = { id };
+  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '1h' });
+  return geraEndereco(token, '/usuario/verifica_email');
+}
 
+async function enviaEmailVerificacao(usuario) {
+  const endereco = geraEnderecoVerificaEmail(usuario.id);
+  await enviaEmail({
+    from: '"Blog do Código" <noreply@blogdocodigo.com.br>',
+    to: usuario.email,
+    subject: 'Verificação de e-mail',
+    text: `Olá! Confirme seu e-mail aqui: ${endereco}.`,
+    html: `Olá! Confirme seu e-mail <a href="${endereco}">aqui</a>.`
+  });
+}
+
+async function enviaEmailAtualizaSenha(usuario) {
+  const token = crypto.randomBytes(24).toString('hex');
+  const endereco = geraEndereco(token, '/usuario/senha');
+
+  const umaHoraEmMilissegundos = 1000 * 60 * 60;
+  await tokensAtualizaSenha.adiciona(
+    token,
+    usuario.id,
+    Date.now() + umaHoraEmMilissegundos
+  );
+
+  await enviaEmail({
+    from: '"Blog do Código" <noreply@blogdocodigo.com.br>',
+    to: usuario.email,
+    subject: 'Atualização de senha',
+    text: `Olá! Atualize sua senha aqui: ${endereco}.`,
+    html: `Olá! Atualize sua senha <a href="${endereco}">aqui</a>.`
+  });
+}
+
+async function enviaEmail(emailInfo) {
+  // faz o curso com a conta teste + 'para saber mais' com dicas para produção?
   const contaTeste = await nodemailer.createTestAccount();
 
   const transportador = nodemailer.createTransport({
@@ -105,15 +140,8 @@ async function enviaEmailverificacao(usuario) {
     auth: contaTeste
   });
 
-  const endereco = geraEndereco(usuario.id);
-  const info = await transportador.sendMail({
-    from: '"Blog do Código" <noreply@blogdocodigo.com.br>',
-    to: usuario.email,
-    subject: 'verificação de e-mail',
-    text: `Olá! Confirme seu e-mail aqui: ${endereco}.`,
-    html: `Olá! Confirme seu e-mail <a href="${endereco}">aqui</a>.`
-  });
-  console.log('URL:' + nodemailer.getTestMessageUrl(info));
+  const resultado = await transportador.sendMail(emailInfo);
+  console.log('URL:' + nodemailer.getTestMessageUrl(resultado));
 }
 
 module.exports = {
@@ -132,7 +160,7 @@ module.exports = {
       await usuario.adiciona();
 
       // sem await a request não trava mas não sei como tratar eventuais erros
-      enviaEmailverificacao(usuario).catch(console.error);
+      enviaEmailVerificacao(usuario).catch(console.error);
 
       res.status(201).json();
     } catch (erro) {
@@ -175,6 +203,60 @@ module.exports = {
       } else {
         res.status(500).json({ erro: erro.message });
       }
+    }
+  },
+
+  async esqueciSenha(req, res) {
+    try {
+      // o usuário pode não saber seu id para fazer a requisição na api
+      // precisa verificar se o usuário que faz a requisição é válido
+      const id = req.params.id;
+      const usuario = await Usuario.buscaPorId(id);
+
+      // pode ser falha de segurança
+      // mostra quais ids possuem usuários e quais não
+      if (!usuario) {
+        throw new InvalidArgumentError('Usuário inválido!');
+      }
+
+      // talvez mudar o tipo do erro para ter um código HTTP coerente
+      if (!usuario.emailVerificado) {
+        throw new InvalidArgumentError('E-mail não verificado!');
+      }
+
+      enviaEmailAtualizaSenha(usuario).catch(console.error);
+      res.status(202).json();
+    } catch (erro) {
+      if (erro instanceof InvalidArgumentError) {
+        return res.status(403).json({ erro: erro.message });
+      }
+
+      res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async atualizaSenha(req, res) {
+    try {
+      const { senha } = req.body;
+      const token = req.params.token;
+
+      if (!(await tokensAtualizaSenha.contemChave(token))) {
+        return res.status(404).json();
+      }
+
+      const id = await tokensAtualizaSenha.buscaId(token);
+      const usuario = await Usuario.buscaPorId(id);
+      await usuario.modificaSenha(senha);
+
+      // token só pode ser usado uma vez
+      await tokensAtualizaSenha.deleta(token);
+
+      res.status(200).json();
+    } catch (erro) {
+      if (erro instanceof InvalidArgumentError) {
+        return res.status(422).json({ erro: erro.message });
+      }
+      res.status(500).json({ erro: erro.message });
     }
   },
 
