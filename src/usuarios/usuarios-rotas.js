@@ -11,6 +11,12 @@ module.exports = app => {
     .get(usuariosControlador.verificaEmail);
 
   app
+    .route('/usuario/:id/esqueci_senha')
+    .post(usuariosControlador.esqueciSenha);
+
+  app.route('/usuario/senha/:token').put(usuariosControlador.atualizaSenha);
+
+  app
     .route('/usuario/verifica_email/:token')
     .get(usuariosControlador.verificaEmail);
 
