@@ -31,7 +31,12 @@ module.exports = {
 
   async verificaEmail(req, res) {
     try {
-      const payload = jwt.verify(req.params.token, process.env.CHAVE_JWT);
+      const token = req.query.token;
+      if (!token) {
+        return res.status(404).json();
+      }
+
+      const payload = jwt.verify(token, process.env.CHAVE_JWT);
       const usuario = await Usuario.buscaPorId(payload.id);
       await usuario.verificaEmail();
       res.status(200).json();
@@ -93,9 +98,9 @@ module.exports = {
   async atualizaSenha(req, res) {
     try {
       const { senha } = req.body;
-      const token = req.params.token;
+      const token = req.query.token;
 
-      if (!(await tokensAtualizaSenha.contemChave(token))) {
+      if (!token || !(await tokensAtualizaSenha.contemChave(token))) {
         return res.status(404).json();
       }
 

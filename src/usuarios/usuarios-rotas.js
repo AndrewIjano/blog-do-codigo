@@ -14,10 +14,10 @@ module.exports = app => {
     .route('/usuario/:id/esqueci_senha')
     .post(usuariosControlador.esqueciSenha);
 
-  app.route('/usuario/senha/:token').put(usuariosControlador.atualizaSenha);
+  app.route('/usuario/senha').put(usuariosControlador.atualizaSenha);
 
   app
-    .route('/usuario/verifica_email/:token')
+    .route('/usuario/verifica_email')
     .get(usuariosControlador.verificaEmail);
 
   app
