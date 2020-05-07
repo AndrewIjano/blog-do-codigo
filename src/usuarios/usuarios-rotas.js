@@ -5,7 +5,7 @@ module.exports = app => {
   app.route('/usuario/atualiza_token').post(usuariosControlador.atualizaToken);
 
   app
-    .route('/usuario/:id/esqueci_senha')
+    .route('/usuario/esqueci_senha')
     .post(usuariosControlador.esqueciSenha);
 
   app.route('/usuario/senha').put(usuariosControlador.atualizaSenha);

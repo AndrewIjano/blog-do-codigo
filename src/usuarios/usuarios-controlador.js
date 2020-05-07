@@ -213,13 +213,10 @@ module.exports = {
 
   async esqueciSenha(req, res) {
     try {
-      // o usuário pode não saber seu id para fazer a requisição na api
-      // precisa verificar se o usuário que faz a requisição é válido
-      const id = req.params.id;
-      const usuario = await Usuario.buscaPorId(id);
+      // precisa verificar se o usuário que faz a requisição é válido?
+      const { email } = req.body;
+      const usuario = await Usuario.buscaPorEmail(email);
 
-      // pode ser falha de segurança
-      // mostra quais ids possuem usuários e quais não
       if (!usuario) {
         throw new InvalidArgumentError('Usuário inválido!');
       }
@@ -233,7 +230,7 @@ module.exports = {
       res.status(202).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        return res.status(403).json({ erro: erro.message });
+        return res.status(400).json({ erro: erro.message });
       }
 
       res.status(500).json({ erro: erro.message });
