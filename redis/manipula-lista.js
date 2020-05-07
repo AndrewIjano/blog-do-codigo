@@ -18,9 +18,10 @@ module.exports = lista => {
       const resultado = await existsAsync(chave);
       return resultado === 1;
     },
-    deleta(chave) {
-      // uso await e async aqui?
-      delAsync(chave);
+    async deleta(chave) {
+      // mesmo que não precise de um callback, ainda precisa tratar os erros
+      // então a gente consegue capturar eles no try/catch usando await
+      await delAsync(chave);
     }
   };  
 } 
