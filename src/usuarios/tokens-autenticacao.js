@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const moment = require('moment');
 
 const refreshTokens = require('../../redis/manipula-refresh-tokens');
 const blacklist = require('../../redis/manipula-blacklist');
@@ -18,9 +19,7 @@ function criaAccessToken(usuarioId) {
 // É possível criar mecanismos para detectar roubo de refresh token
 function criaRefreshToken(usuarioId) {
   const refreshToken = crypto.randomBytes(24).toString('hex');
-
-  const cincoDiasEmMilissegundos = 1000 * 60 * 60 * 24 * 5;
-  const dataExpiracao = Date.now() + cincoDiasEmMilissegundos;
+  const dataExpiracao = moment().add(5, 'd').unix();  
   refreshTokens.adiciona(refreshToken, usuarioId, dataExpiracao);
 
   return refreshToken;
