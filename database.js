@@ -22,11 +22,6 @@ db.serialize(() => {
   db.run('PRAGMA foreign_keys=ON');
   db.run(POSTS_SCHEMA);
   db.run(USUARIOS_SCHEMA);
-
-  db.each('SELECT * FROM usuarios', (err, usuario) => {
-    console.log('Usuarios: ');
-    console.log(usuario);
-  });
 });
 
 process.on('SIGINT', () =>
