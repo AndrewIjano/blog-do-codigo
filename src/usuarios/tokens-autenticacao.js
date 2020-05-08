@@ -17,10 +17,10 @@ function criaAccessToken(usuarioId) {
 }
 
 // É possível criar mecanismos para detectar roubo de refresh token
-function criaRefreshToken(usuarioId) {
+async function criaRefreshToken(usuarioId) {
   const refreshToken = crypto.randomBytes(24).toString('hex');
   const dataExpiracao = moment().add(5, 'd').unix();  
-  refreshTokens.adiciona(refreshToken, usuarioId, dataExpiracao);
+  await refreshTokens.adiciona(refreshToken, usuarioId, dataExpiracao);
 
   return refreshToken;
 }
@@ -40,9 +40,9 @@ async function verificaRefreshToken(token) {
 }
 
 module.exports = {
-  criaTokens(usuarioId) {
+  async criaTokens(usuarioId) {
     const accessToken = criaAccessToken(usuarioId);
-    const refreshToken = criaRefreshToken(usuarioId);
+    const refreshToken = await criaRefreshToken(usuarioId);
     return { accessToken, refreshToken };
   },
 
