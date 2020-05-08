@@ -1,45 +1,6 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
-
-const jwt = require('jsonwebtoken');
-const blacklist = require('../../redis/manipula-blacklist');
-const refreshTokens = require('../../redis/manipula-refresh-tokens');
-
-const crypto = require('crypto');
-
-function criaTokenJWT(usuario) {
-  const payload = {
-    id: usuario.id
-  };
-
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
-}
-
-// É possível criar mecanismos para detectar roubo de refresh token
-function criaRefreshToken(usuario) {
-  const refreshToken = crypto.randomBytes(24).toString('hex');
-
-  const cincoDiasEmMilissegundos = 1000 * 60 * 60 * 24 * 5;
-  const dataExpiracao = Date.now() + cincoDiasEmMilissegundos;
-  refreshTokens.adiciona(refreshToken, usuario.id, dataExpiracao);
-
-  return refreshToken;
-}
-
-async function verificaRefreshToken(token) {
-  if (!token) {
-    throw new InvalidArgumentError('Refresh token inválido');
-  }
-
-  const id = await refreshTokens.buscaId(token);
-
-  // Essas verificações repetidas estão certas?
-  if (!id) {
-    throw new InvalidArgumentError('Refresh token inválido');
-  }
-  return id;
-}
+const tokens = require('./tokens-autenticacao');
 
 module.exports = {
   async adiciona(req, res) {
@@ -69,18 +30,12 @@ module.exports = {
 
   async atualizaToken(req, res) {
     try {
-      const refreshToken = req.body.refreshToken;
-      const id = await verificaRefreshToken(refreshToken);
-
-      // talvez dê pra refatorar isso?
-      const accessToken = criaTokenJWT({ id });
-      const novoRefreshToken = criaRefreshToken({ id });
-
-      // Invalida refresh token antigo
-      refreshTokens.deleta(refreshToken);
+      const { accessToken, refreshToken } = tokens.atualizaTokens(
+        req.body.refreshTokens
+      );
 
       res.set('Authorization', accessToken);
-      res.status(200).json({ refreshToken: novoRefreshToken });
+      res.status(200).json({ refreshToken });
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(401).json({ erro: erro.message });
@@ -92,8 +47,7 @@ module.exports = {
 
   async login(req, res) {
     try {
-      const accessToken = criaTokenJWT(req.user);
-      const refreshToken = criaRefreshToken(req.user);
+      const { accessToken, refreshToken } = tokens.criaTokens(req.user.id);
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken });
     } catch (erro) {
@@ -103,8 +57,7 @@ module.exports = {
 
   async logout(req, res) {
     try {
-      const token = req.token;
-      await blacklist.adiciona(token);
+      await tokens.invalidaAccessToken(req.token);
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
