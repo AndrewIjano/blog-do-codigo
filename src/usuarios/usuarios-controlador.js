@@ -30,22 +30,18 @@ module.exports = {
 
   async atualizaToken(req, res) {
     try {
-      const { accessToken, refreshToken } = await tokens.atualizaTokens(
-        req.body.refreshToken
-      );
-
-      res.set('Authorization', accessToken);
-      res.status(200).json({ refreshToken });
+      const id = await tokens.usaRefreshToken(req.body.refreshToken);
+      req.user = { id };
+      this.login(req, res);
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         res.status(401).json({ erro: erro.message });
-      } else {
-        res.status(500).json({ erro: erro.message });
       }
+      res.status(500).json({ erro: erro.message });
     }
   },
 
-  async login(req, res) {
+  login(req, res) {
     try {
       const { accessToken, refreshToken } = tokens.criaTokens(req.user.id);
       res.set('Authorization', accessToken);
@@ -58,6 +54,7 @@ module.exports = {
   async logout(req, res) {
     try {
       await tokens.invalidaAccessToken(req.token);
+      // TODO invalidar também o refresh token
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });

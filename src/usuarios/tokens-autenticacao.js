@@ -46,10 +46,10 @@ module.exports = {
     return { accessToken, refreshToken };
   },
 
-  async atualizaTokens(refreshToken) {
+  async usaRefreshToken(refreshToken) {
     const usuarioId = await verificaRefreshToken(refreshToken);
     await refreshTokens.deleta(refreshToken);
-    return this.criaTokens(usuarioId);
+    return usuarioId;
   },
 
   invalidaAccessToken(accessToken) {
