@@ -30,8 +30,8 @@ module.exports = {
 
   async atualizaToken(req, res) {
     try {
-      const { accessToken, refreshToken } = tokens.atualizaTokens(
-        req.body.refreshTokens
+      const { accessToken, refreshToken } = await tokens.atualizaTokens(
+        req.body.refreshToken
       );
 
       res.set('Authorization', accessToken);
