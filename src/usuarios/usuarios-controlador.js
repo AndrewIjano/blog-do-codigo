@@ -1,34 +1,8 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 const tokens = require('./tokens-autenticacao');
-
-function geraEndereco(id) {
-  const payload = {id}
-  const token = jwt.sign({ id }, process.env.CHAVE_JWT, { expiresIn: '1h' });
-  const baseURL = process.env.BASE_URL;
-  return `${baseURL}/usuario/verifica_email/${token}`;
-}
-
-async function enviaEmailverificacao(usuario) {
-  // faz o curso com a conta teste + 'para saber mais' com dicas para produção?
-
-  const contaTeste = await nodemailer.createTestAccount();
-
-  const transportador = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    auth: contaTeste
-  });
-
-  const endereco = geraEndereco(usuario.id);
-  const info = await transportador.sendMail({
-    from: '"Blog do Código" <noreply@blogdocodigo.com.br>',
-    to: usuario.email,
-    subject: 'verificação de e-mail',
-    text: `Olá! Confirme seu e-mail aqui: ${endereco}.`,
-    html: `Olá! Confirme seu e-mail <a href="${endereco}">aqui</a>.`
-  });
-  console.log('URL:' + nodemailer.getTestMessageUrl(info));
-}
+const { EmailVerificacao } = require('./emails');
+const jwt = require('jsonwebtoken')
 
 module.exports = {
   async adiciona(req, res) {
@@ -38,15 +12,13 @@ module.exports = {
       const usuario = new Usuario({
         nome,
         email,
-        emailverificado: false
+        emailVerificado: false
       });
-
       await usuario.adicionaSenha(senha);
-
       await usuario.adiciona();
 
-      // sem await a request não trava mas não sei como tratar eventuais erros
-      enviaEmailverificacao(usuario).catch(console.error);
+      const emailVerificacao = new EmailVerificacao(usuario);
+      emailVerificacao.enviaEmail().catch(console.error);
 
       res.status(201).json();
     } catch (erro) {
@@ -73,7 +45,9 @@ module.exports = {
 
   async login(req, res) {
     try {
-      const { accessToken, refreshToken } = await tokens.criaTokens(req.user.id);
+      const { accessToken, refreshToken } = await tokens.criaTokens(
+        req.user.id
+      );
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken });
     } catch (erro) {
