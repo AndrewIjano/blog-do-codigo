@@ -1,8 +1,8 @@
 const Usuario = require('./usuarios-modelo');
-const { InvalidArgumentError, InternalServerError } = require('../erros');
+const { InvalidArgumentError } = require('../erros');
 const tokens = require('./tokens-autenticacao');
 const { EmailVerificacao } = require('./emails');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 module.exports = {
   async adiciona(req, res) {
@@ -23,12 +23,9 @@ module.exports = {
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        res.status(422).json({ erro: erro.message });
-      } else if (erro instanceof InternalServerError) {
-        res.status(500).json({ erro: erro.message });
-      } else {
-        res.status(500).json({ erro: erro.message });
+        return res.status(422).json({ erro: erro.message });
       }
+      res.status(500).json({ erro: erro.message });
     }
   },
 
