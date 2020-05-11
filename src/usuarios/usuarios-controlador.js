@@ -28,22 +28,6 @@ module.exports = {
     }
   },
 
-  async atualizaToken(req, res) {
-    try {
-      const id = await tokens.usaRefreshToken(req.body.refreshToken);
-      req.user = { id };
-      // isso não funciona
-      // this é setado para o objeto global
-      // TODO: descobrir como arrumar isso
-      await this.login(req, res);
-    } catch (erro) {
-      if (erro instanceof InvalidArgumentError) {
-        res.status(401).json({ erro: erro.message });
-      }
-      res.status(500).json({ erro: erro.message });
-    }
-  },
-
   async login(req, res) {
     try {
       const { accessToken, refreshToken } = await tokens.criaTokens(req.user.id);

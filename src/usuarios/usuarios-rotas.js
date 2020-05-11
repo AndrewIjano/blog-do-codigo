@@ -2,7 +2,9 @@ const usuariosControlador = require('./usuarios-controlador');
 const middlewaresAutenticacao = require('./middlewares-autenticacao');
 
 module.exports = app => {
-  app.route('/usuario/atualiza_token').post(usuariosControlador.atualizaToken);
+  app
+    .route('/usuario/atualiza_token')
+    .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
 
   app
     .route('/usuario/login')

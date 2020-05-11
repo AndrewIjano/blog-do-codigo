@@ -19,24 +19,24 @@ function criaAccessToken(usuarioId) {
 // É possível criar mecanismos para detectar roubo de refresh token
 async function criaRefreshToken(usuarioId) {
   const refreshToken = crypto.randomBytes(24).toString('hex');
-  const dataExpiracao = moment().add(5, 'd').unix();  
+  const dataExpiracao = moment()
+    .add(5, 'd')
+    .unix();
   await refreshTokens.adiciona(refreshToken, usuarioId, dataExpiracao);
 
   return refreshToken;
 }
 
-async function verificaRefreshToken(token) {
+function verificaRefreshTokenExiste(token) {
   if (!token) {
+    throw new InvalidArgumentError('Refresh token não enviado');
+  }
+}
+
+function verificaRefreshTokenValido(usuarioId) {
+  if (!usuarioId) {
     throw new InvalidArgumentError('Refresh token inválido');
   }
-
-  const id = await refreshTokens.buscaId(token);
-
-  // Essas verificações repetidas estão certas?
-  if (!id) {
-    throw new InvalidArgumentError('Refresh token inválido');
-  }
-  return id;
 }
 
 module.exports = {
@@ -46,10 +46,15 @@ module.exports = {
     return { accessToken, refreshToken };
   },
 
-  async usaRefreshToken(refreshToken) {
-    const usuarioId = await verificaRefreshToken(refreshToken);
-    await refreshTokens.deleta(refreshToken);
-    return usuarioId;
+  async verificaRefreshToken(token) {
+    verificaRefreshTokenExiste(token);
+    const id = await refreshTokens.buscaId(token);
+    verificaRefreshTokenValido(id);
+    return id;
+  },
+
+  invalidaRefreshToken(refreshToken) {
+    return refreshTokens.deleta(refreshToken);
   },
 
   invalidaAccessToken(accessToken) {
