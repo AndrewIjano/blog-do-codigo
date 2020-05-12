@@ -1,17 +1,6 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
-
-const jwt = require('jsonwebtoken');
-const blacklist = require('../../redis/manipula-blacklist');
-
-function criaTokenJWT(usuario) {
-  const payload = {
-    id: usuario.id
-  };
-
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
-}
+const tokens = require('./tokens-autenticacao');
 
 module.exports = {
   async adiciona(req, res) {
@@ -39,16 +28,20 @@ module.exports = {
     }
   },
 
-  login(req, res) {
-    const token = criaTokenJWT(req.user);
-    res.set('Authorization', token);
-    res.status(204).json();
+  async login(req, res) {
+    try {
+      const { accessToken, refreshToken } = await tokens.criaTokens(req.user.id);
+      res.set('Authorization', accessToken);
+      res.status(200).json({ refreshToken });
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message });
+    }
   },
 
   async logout(req, res) {
     try {
-      const token = req.token;
-      await blacklist.adiciona(token);
+      await tokens.invalidaAccessToken(req.token);
+      // TODO invalidar também o refresh token
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
