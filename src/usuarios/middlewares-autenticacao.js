@@ -1,5 +1,5 @@
 const passport = require('passport');
-const tokens = require('./tokens-autenticacao');
+const tokens = require('./tokens');
 const Usuario = require('./usuarios-modelo');
 
 module.exports = {
@@ -62,6 +62,35 @@ module.exports = {
       const id = await tokens.verificaRefreshToken(refreshToken);
       await tokens.invalidaRefreshToken(refreshToken);
       req.user = await Usuario.buscaPorId(id); // talvez verificar se o usuário ainda existe
+      return next();
+    } catch (erro) {
+      if (erro.name === 'InvalidArgumentError') {
+        return res.status(401).json({ erro: erro.message });
+      }
+      return res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async verificaEmail(req, res, next) {
+    try {
+      const { token } = req.params;
+      const id = tokens.verificaTokenVerificaEmail(token);
+      req.user = await Usuario.buscaPorId(id);
+      return next();
+    } catch (erro) {
+      if (erro.name === 'InvalidArgumentError') {
+        return res.status(401).json({ erro: erro.message });
+      }
+      return res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async atualizaSenha(req, res, next) {
+    try {
+      const { token } = req.params;
+      const id = await tokens.verificaTokenAtualizaSenha(token);
+      req.user = await Usuario.buscaPorId(id);
+      req.token = token;
       return next();
     } catch (erro) {
       if (erro.name === 'InvalidArgumentError') {

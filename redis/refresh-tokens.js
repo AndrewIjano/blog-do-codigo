@@ -1,2 +1,5 @@
 const redis = require('redis');
-module.exports = redis.createClient({ prefix: 'refresh-token:' });
+const manipulaLista = require('./manipula-lista'); 
+const refreshTokens = redis.createClient({ prefix: 'refresh-token:' });
+module.exports = manipulaLista(refreshTokens);
+

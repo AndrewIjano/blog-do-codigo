@@ -9,7 +9,7 @@ const { InvalidArgumentError } = require('../erros');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const blacklist = require('../../redis/manipula-blacklist');
+const blacklist = require('../../redis/blacklist');
 
 function verificaUsuario(usuario) {
   if (!usuario) {
@@ -53,16 +53,14 @@ passport.use(
 );
 
 passport.use(
-  new BearerStrategy(
-    async (token, done) => {
-      try {
-        await verificaTokenNaBlacklist(token);
-        const payload = jwt.verify(token, process.env.CHAVE_JWT);
-        const usuario = await Usuario.buscaPorId(payload.id);
-        done(null, usuario, { token: token });
-      } catch (erro) {
-        done(erro);
-      }      
+  new BearerStrategy(async (token, done) => {
+    try {
+      await verificaTokenNaBlacklist(token);
+      const payload = jwt.verify(token, process.env.CHAVE_JWT);
+      const usuario = await Usuario.buscaPorId(payload.id);
+      done(null, usuario, { token: token });
+    } catch (erro) {
+      done(erro);
     }
-  )
-)
+  })
+);

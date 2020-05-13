@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
+const tokens = require('./tokens');
 
 class ConfiguracaoEmail {
   constructor() {
@@ -40,21 +40,25 @@ class Email {
 }
 
 class EmailVerificacao extends Email {
-  constructor(usuario) {
+  constructor(usuario, endereco) {
     super();
-    const endereco = EmailVerificacao.geraEndereco(usuario.id);
     this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
     this.to = usuario.email;
     this.subject = 'Verificação de e-mail';
     this.text = `Olá! Confirme seu e-mail aqui: ${endereco}.`;
     this.html = `Olá! Confirme seu e-mail <a href="${endereco}">aqui</a>.`;
   }
+}
 
-  static geraEndereco(id) {
-    const token = jwt.sign({ id }, process.env.CHAVE_JWT, { expiresIn: '1h' });
-    const baseURL = process.env.BASE_URL;
-    return `${baseURL}/usuario/verifica_email/${token}`;
+class EmailAtualizaSenha extends Email {
+  constructor(usuario, endereco) {
+    super();
+    this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
+    this.to = usuario.email;
+    this.subject = 'Atualização de senha';
+    this.text = `Olá! Atualize sua senha aqui: ${endereco}.`;
+    this.html = `Olá! Atualize sua senha <a href="${endereco}">aqui</a>.`;
   }
 }
 
-module.exports = { EmailVerificacao };
+module.exports = { EmailVerificacao, EmailAtualizaSenha };

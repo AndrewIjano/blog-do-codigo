@@ -23,5 +23,5 @@ module.exports = lista => {
       // então a gente consegue capturar eles no try/catch usando await
       await delAsync(chave);
     }
-  };  
-} 
+  };
+};
