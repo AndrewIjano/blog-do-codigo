@@ -9,6 +9,7 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
+    this.emailVerificado = Number(usuario.emailVerificado);
 
     this.valida();
   }
@@ -18,7 +19,11 @@ class Usuario {
       throw new InvalidArgumentError('O usuário já existe!');
     }
 
-    return usuariosDao.adiciona(this);
+    await usuariosDao.adiciona(this);
+    // necessário ter o id para verificação de e-mail
+    // não encontrei ainda forma de recuperar isso a partir do INSERT
+    const { id } = await Usuario.buscaPorEmail(this.email);
+    this.id = id;
   }
 
   async adicionaSenha(senha) {
@@ -32,6 +37,10 @@ class Usuario {
   valida() {
     validacoes.campoStringNaoNulo(this.nome, 'nome');
     validacoes.campoStringNaoNulo(this.email, 'email');
+  }
+
+  async verificaEmail() {
+    await usuariosDao.modificaEmailVerificado(this, true);
   }
 
   async deleta() {

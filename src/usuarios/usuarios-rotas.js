@@ -3,6 +3,18 @@ const middlewaresAutenticacao = require('./middlewares-autenticacao');
 
 module.exports = app => {
   app
+    .route('/usuario/atualiza_token')
+    .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
+
+  app
+    .route('/usuario/verifica_email/:token')
+    .get(usuariosControlador.verificaEmail);
+
+  app
+    .route('/usuario/verifica_email/:token')
+    .get(usuariosControlador.verificaEmail);
+
+  app
     .route('/usuario/login')
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 
