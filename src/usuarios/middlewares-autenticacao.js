@@ -59,8 +59,8 @@ module.exports = {
   async refresh(req, res, next) {
     try {
       const { refreshToken } = req.body;
-      const id = await tokens.verificaRefreshToken(refreshToken);
-      await tokens.invalidaRefreshToken(refreshToken);
+      const id = await tokens.refresh.verifica(refreshToken);
+      await tokens.refresh.invalida(refreshToken);
       req.user = await Usuario.buscaPorId(id); // talvez verificar se o usuário ainda existe
       return next();
     } catch (erro) {
@@ -74,7 +74,7 @@ module.exports = {
   async verificaEmail(req, res, next) {
     try {
       const { token } = req.params;
-      const id = tokens.verificaTokenVerificaEmail(token);
+      const id = await tokens.verificacaoEmail.verifica(token);
       req.user = await Usuario.buscaPorId(id);
       return next();
     } catch (erro) {
@@ -88,7 +88,7 @@ module.exports = {
   async atualizaSenha(req, res, next) {
     try {
       const { token } = req.params;
-      const id = await tokens.verificaTokenAtualizaSenha(token);
+      const id = await tokens.atualizacaoSenha.verifica(token);
       req.user = await Usuario.buscaPorId(id);
       req.token = token;
       return next();

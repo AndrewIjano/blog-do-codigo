@@ -2,101 +2,120 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const moment = require('moment');
 
-const refreshTokens = require('../../redis/refresh-tokens');
-const blacklist = require('../../redis/blacklist');
-const tokensAtualizaSenha = require('../../redis/tokens-atualiza-senha');
+const {
+  blacklistAccessToken,
+  whitelistTokenAtualizacaoSenha,
+  whitelistRefreshToken
+} = require('../../redis');
 
 const { InvalidArgumentError } = require('../erros');
 
-function criaAccessToken(usuarioId) {
-  const payload = { id: usuarioId };
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
+function criaTokenJWT(id, [tempoQuantidade, tempoUnidade]) {
+  return jwt.sign({ id }, process.env.CHAVE_JWT, {
+    expiresIn: tempoQuantidade + tempoUnidade
+  });
 }
 
-// É possível criar mecanismos para detectar roubo de refresh token
-async function criaRefreshToken(usuarioId) {
-  const refreshToken = crypto.randomBytes(24).toString('hex');
+async function verificaTokenJWT(token, nomeToken, blacklist) {
+  verificaTokenEnviado(token, nomeToken);
+  await verificaTokenNaBlacklist(token, blacklist);
+  const { id } = jwt.verify(token, process.env.CHAVE_JWT);
+  return id;
+}
+
+async function criaTokenOpaco(id, [tempoQuantidade, tempoUnidade], lista) {
+  const tokenOpaco = crypto.randomBytes(24).toString('hex');
   const dataExpiracao = moment()
-    .add(5, 'd')
+    .add(tempoQuantidade, tempoUnidade)
     .unix();
-  await refreshTokens.adiciona(refreshToken, usuarioId, dataExpiracao);
-
-  return refreshToken;
+  await lista.adiciona(tokenOpaco, id, dataExpiracao);
+  return tokenOpaco;
 }
 
-async function criaTokenAtualizaSenha(usuarioId) {
-  const tokenAtualizaSenha = crypto.randomBytes(24).toString('hex');
-  const dataExpiracao = moment()
-    .add(1, 'h')
-    .unix();
-  await tokensAtualizaSenha.adiciona(
-    tokenAtualizaSenha,
-    usuarioId,
-    dataExpiracao
-  );
-
-  return tokenAtualizaSenha;
+async function verificaTokenOpaco(token, nomeToken, lista) {
+  verificaTokenEnviado(token, nomeToken);
+  const id = await lista.buscaId(token);
+  verificaTokenValido(id, nomeToken);
+  return id;
 }
 
-function verificaTokenExiste(token, nomeToken) {
+function verificaTokenEnviado(token, nomeToken) {
   if (!token) {
-    throw new InvalidArgumentError(`${nomeToken} não enviado`);
+    throw new InvalidArgumentError(`Token ${nomeToken} não enviado`);
   }
 }
 
 function verificaTokenValido(usuarioId, nomeToken) {
   if (!usuarioId) {
-    throw new InvalidArgumentError(`${nomeToken} inválido`);
+    throw new InvalidArgumentError(`Token ${nomeToken} inválido`);
+  }
+}
+
+async function verificaTokenNaBlacklist(token, blacklist) {
+  if (!blacklist) {
+    return;
+  }
+
+  const tokenNaBlacklist = await blacklist.contemToken(token);
+  if (tokenNaBlacklist) {
+    throw new jwt.JsonWebTokenError('Token inválido por logout!');
   }
 }
 
 module.exports = {
-  async criaTokensAutenticacao(usuarioId) {
-    const accessToken = criaAccessToken(usuarioId);
-    const refreshToken = await criaRefreshToken(usuarioId);
-    return { accessToken, refreshToken };
+  access: {
+    nome: 'access',
+    expiracao: [15, 'm'],
+    lista: blacklistAccessToken,
+    cria(id) {
+      return criaTokenJWT(id, this.expiracao);
+    },
+    verifica(token) {
+      return verificaTokenJWT(token, this.nome, this.lista);
+    },
+    invalida(token) {
+      return this.lista.adiciona(token);
+    }
   },
 
-  criaTokenVerificaEmail(usuarioId) {
-    const payload = { id: usuarioId };
-    return jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '1h' });
+  refresh: {
+    nome: 'refresh',
+    expiracao: [5, 'd'],
+    lista: whitelistRefreshToken,
+    cria(id) {
+      return criaTokenOpaco(id, this.expiracao, this.lista);
+    },
+    verifica(token) {
+      return verificaTokenOpaco(token, this.nome, this.lista);
+    },
+    invalida(token) {
+      return this.lista.deleta(token);
+    }
   },
 
-  criaTokenAtualizaSenha,
-
-  async verificaRefreshToken(token) {
-    const nomeRefreshToken = 'Refresh Token';
-    verificaTokenExiste(token, nomeRefreshToken);
-    const id = await refreshTokens.buscaId(token);
-    verificaTokenValido(id, nomeRefreshToken);
-    return id;
+  verificacaoEmail: {
+    nome: 'verificacaoEmail',
+    expiracao: [1, 'h'],
+    cria(id) {
+      return criaTokenJWT(id, this.expiracao);
+    },
+    verifica(token) {
+      return verificaTokenJWT(token, this.nome);
+    }
   },
 
-  verificaTokenVerificaEmail(token) {
-    const nomeTokenVerificaEmail = 'Token para verificação de e-mail';
-    verificaTokenExiste(token, nomeTokenVerificaEmail);
-    const { id } = jwt.verify(token, process.env.CHAVE_JWT);
-    return id;
-  },
-
-  async verificaTokenAtualizaSenha(token) {
-    const nomeTokenAtualizaSenha = 'Token para atualização de senha';
-    verificaTokenExiste(token, nomeTokenAtualizaSenha);
-    const id = await tokensAtualizaSenha.buscaId(token);
-    verificaTokenValido(id, nomeTokenAtualizaSenha);
-    return id;
-  },
-
-  invalidaAccessToken(token) {
-    return blacklist.adiciona(token);
-  },
-
-  invalidaRefreshToken(token) {
-    return refreshTokens.deleta(token);
-  },
-
-  invalidaTokenAtualizaSenha(token) {
-    return tokensAtualizaSenha.deleta(token);
+  atualizacaoSenha: {
+    nome: 'atualizacaoSenha',
+    expiracao: [1, 'h'],
+    lista: whitelistTokenAtualizacaoSenha,
+    cria(id) {
+      return criaTokenOpaco(id, this.expiracao, this.lista);
+    },
+    verifica(token) {
+      return verificaTokenOpaco(token, this.nome, this.lista);
+    },
+    invalida(token) {
+      return this.lista.deleta(token);
+    }
   }
 };
