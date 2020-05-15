@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const moment = require('moment');
+const speakeasy = require('speakeasy');
 
 const {
   blacklistAccessToken,
@@ -116,6 +117,22 @@ module.exports = {
     },
     invalida(token) {
       return this.lista.deleta(token);
+    }
+  },
+
+  totp: {
+    nome: 'TOTP',
+    cria() {
+      return speakeasy.generateSecret().base32;
+    },
+    verifica(token, chave) {
+      verificaTokenEnviado(token, this.nome);
+      const tokenValido = speakeasy.totp.verify({
+        secret: chave,
+        encoding: 'base32',
+        token: token
+      });
+      verificaTokenValido(tokenValido, this.nome);
     }
   }
 };
