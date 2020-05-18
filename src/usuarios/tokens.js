@@ -134,5 +134,16 @@ module.exports = {
       });
       verificaTokenValido(tokenValido, this.nome);
     }
+  },
+
+  segundaEtapa: {
+    nome: 'segundaEtapa',
+    expiracao: [5, 'm'],
+    cria(id) {
+      return criaTokenJWT(id, this.expiracao);
+    },
+    verifica(token) {
+      return verificaTokenJWT(token, this.nome);
+    }
   }
 };

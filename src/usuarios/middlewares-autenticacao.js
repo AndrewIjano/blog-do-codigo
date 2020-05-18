@@ -102,17 +102,20 @@ module.exports = {
 
   async doisFatores(req, res, next) {
     try {
-      const token = req.headers.authorization;
-      const { id } = req.params;
+      const { tokenSegundaEtapa } = req.params;
+      const id = await tokens.segundaEtapa.verifica(tokenSegundaEtapa);
       const usuario = await Usuario.buscaPorId(id);
+
+      const token = req.headers.authorization;
       tokens.totp.verifica(token, usuario.chaveAutenticacaoDoisFatores);
+      
       req.user = usuario;
       return next();
     } catch (erro) {
       if (erro.name === 'InvalidArgumentError') {
         return res.status(401).json({ erro: erro.message });
       }
-      res.status(500).json({ erro: erro });
+      res.status(500).json({ erro: erro.message });
     }
   }
 };

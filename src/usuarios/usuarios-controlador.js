@@ -63,7 +63,8 @@ module.exports = {
   async login(req, res) {
     try {
       const { id } = req.user;
-      const endereco = geraEndereco('/usuario/login/', id);
+      const token = tokens.segundaEtapa.cria(id);
+      const endereco = geraEndereco('/usuario/login/', token);
       res.location(endereco);
       res.status(303).json();
     } catch (erro) {
@@ -72,7 +73,7 @@ module.exports = {
   },
 
   async segundaEtapaAutenticacao(req, res) {
-    const { id } = req.params;
+    const { id } = req.user;
     const accessToken = tokens.access.cria(id);
     const refreshToken = await tokens.refresh.cria(id);
     res.set('Authorization', accessToken);

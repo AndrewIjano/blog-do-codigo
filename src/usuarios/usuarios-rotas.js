@@ -27,7 +27,7 @@ module.exports = app => {
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 
   app
-    .route('/usuario/login/:id')
+    .route('/usuario/login/:tokenSegundaEtapa')
     .get(
       middlewaresAutenticacao.doisFatores,
       usuariosControlador.segundaEtapaAutenticacao
