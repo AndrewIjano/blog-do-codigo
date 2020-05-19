@@ -31,7 +31,7 @@ module.exports = app => {
 
   app
     .route('/usuario/login/:tokenSegundaEtapa')
-    .get(middlewaresAutenticacao.doisFatores, usuariosControlador.login);
+    .post(middlewaresAutenticacao.doisFatores, usuariosControlador.login);
 
   app
     .route('/usuario/logout')

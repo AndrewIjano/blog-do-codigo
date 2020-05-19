@@ -65,8 +65,7 @@ module.exports = {
       const { id } = req.user;
       const token = tokens.segundaEtapa.cria(id);
       const endereco = geraEndereco('/usuario/login/', token);
-      res.location(endereco);
-      res.status(303).json();
+      res.status(200).json({ endereco });
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
