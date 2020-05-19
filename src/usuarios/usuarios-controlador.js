@@ -60,7 +60,7 @@ module.exports = {
     }
   },
 
-  async login(req, res) {
+  async redirecionaSegundaEtapaAutenticacao(req, res) {
     try {
       const { id } = req.user;
       const token = tokens.segundaEtapa.cria(id);
@@ -72,7 +72,7 @@ module.exports = {
     }
   },
 
-  async segundaEtapaAutenticacao(req, res) {
+  async login(req, res) {
     const { id } = req.user;
     const accessToken = tokens.access.cria(id);
     const refreshToken = await tokens.refresh.cria(id);
@@ -83,7 +83,6 @@ module.exports = {
   async logout(req, res) {
     try {
       await tokens.access.invalida(req.token);
-      // TODO invalidar também o refresh token
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
@@ -101,7 +100,6 @@ module.exports = {
 
   async esqueciSenha(req, res) {
     try {
-      // precisa verificar se o usuário que faz a requisição é válido?
       const { email } = req.body;
       const usuario = await Usuario.buscaPorEmail(email);
 

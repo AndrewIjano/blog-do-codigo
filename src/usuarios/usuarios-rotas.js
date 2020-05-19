@@ -24,14 +24,14 @@ module.exports = app => {
 
   app
     .route('/usuario/login')
-    .post(middlewaresAutenticacao.local, usuariosControlador.login);
+    .post(
+      middlewaresAutenticacao.local,
+      usuariosControlador.redirecionaSegundaEtapaAutenticacao
+    );
 
   app
     .route('/usuario/login/:tokenSegundaEtapa')
-    .get(
-      middlewaresAutenticacao.doisFatores,
-      usuariosControlador.segundaEtapaAutenticacao
-    );
+    .get(middlewaresAutenticacao.doisFatores, usuariosControlador.login);
 
   app
     .route('/usuario/logout')
