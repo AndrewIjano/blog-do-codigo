@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const tokens = require('./tokens');
 
 class ConfiguracaoEmail {
   constructor() {

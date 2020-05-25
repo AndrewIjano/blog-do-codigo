@@ -32,6 +32,7 @@ module.exports = {
         emailVerificado: false
       });
       await usuario.adicionaSenha(senha);
+      usuario.adicionaChaveAutenticacaoDoisFatores();
       await usuario.adiciona();
 
       const token = tokens.verificacaoEmail.cria(usuario.id);
@@ -39,7 +40,8 @@ module.exports = {
       const emailVerificacao = new EmailVerificacao(usuario, endereco);
       emailVerificacao.enviaEmail().catch(console.error);
 
-      res.status(201).json();
+      const { chaveAutenticacaoDoisFatores } = usuario;
+      res.status(201).json({ chaveAutenticacaoDoisFatores });
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
         return res.status(422).json({ erro: erro.message });
@@ -58,22 +60,28 @@ module.exports = {
     }
   },
 
-  async login(req, res) {
+  async redirecionaSegundaEtapaAutenticacao(req, res) {
     try {
       const { id } = req.user;
-      const accessToken = tokens.access.cria(id);
-      const refreshToken = await tokens.refresh.cria(id);
-      res.set('Authorization', accessToken);
-      res.status(200).json({ refreshToken });
+      const token = tokens.segundaEtapa.cria(id);
+      const endereco = geraEndereco('/usuario/login/', token);
+      res.status(200).json({ endereco });
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
   },
 
+  async login(req, res) {
+    const { id } = req.user;
+    const accessToken = tokens.access.cria(id);
+    const refreshToken = await tokens.refresh.cria(id);
+    res.set('Authorization', accessToken);
+    res.status(200).json({ refreshToken });
+  },
+
   async logout(req, res) {
     try {
       await tokens.access.invalida(req.token);
-      // TODO invalidar também o refresh token
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
@@ -91,7 +99,6 @@ module.exports = {
 
   async esqueciSenha(req, res) {
     try {
-      // precisa verificar se o usuário que faz a requisição é válido?
       const { email } = req.body;
       const usuario = await Usuario.buscaPorEmail(email);
 

@@ -2,6 +2,7 @@ const usuariosDao = require('./usuarios-dao');
 const { InvalidArgumentError } = require('../erros');
 const validacoes = require('../validacoes-comuns');
 const bcrypt = require('bcrypt');
+const tokens = require('./tokens');
 
 class Usuario {
   constructor(usuario) {
@@ -10,7 +11,7 @@ class Usuario {
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
     this.emailVerificado = Number(usuario.emailVerificado);
-
+    this.chaveAutenticacaoDoisFatores = usuario.chaveAutenticacaoDoisFatores;
     this.valida();
   }
 
@@ -32,6 +33,10 @@ class Usuario {
     validacoes.campoTamanhoMaximo(senha, 'senha', 64);
 
     this.senhaHash = await Usuario.gerarSenhaHash(senha);
+  }
+
+  adicionaChaveAutenticacaoDoisFatores() {
+    this.chaveAutenticacaoDoisFatores = tokens.totp.cria();
   }
 
   valida() {
