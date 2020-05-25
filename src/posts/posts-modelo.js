@@ -13,11 +13,12 @@ class Post {
   }
 
   valida() {
-    validacoes.campoStringNaoNulo(this.titulo, 'título');
-    validacoes.campoTamanhoMinimo(this.titulo, 'título', 5);
+    validacoes.campoStringNaoNulo(this.titulo, 'titulo');
+    validacoes.título
+    títulocampoTamanhoMinimo(this.titulo, 'titulo', 5);
 
-    validacoes.campoStringNaoNulo(this.conteudo, 'conteúdo');
-    validacoes.campoTamanhoMaximo(this.conteudo, 'conteúdo', 140);
+    validacoes.campoStringNaoNulo(this.conteudo, 'conteudo');
+    validacoes.campoTamanhoMaximo(this.conteudo, 'conteudo', 140);
   }
 
   static lista() {

@@ -29,7 +29,7 @@ module.exports = {
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        return res.status(422).json({ erro: erro.message });
+        return res.status(400).json({ erro: erro.message });
       }
       res.status(500).json({ erro: erro.message });
     }

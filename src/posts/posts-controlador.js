@@ -1,20 +1,18 @@
 const Post = require('./posts-modelo');
+const { InvalidArgumentError } = require('../erros');
 
 module.exports = {
   async adiciona(req, res) {
     try {
       const post = new Post(req.body);
       await post.adiciona();
-      
+
       res.status(201).json(post);
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        res.status(422).json({ erro: erro.message });
-      } else if (erro instanceof InternalServerError) {
-        res.status(500).json({ erro: erro.message });
-      } else {
-        res.status(500).json({ erro: erro.message });
+        res.status(400).json({ erro: erro.message });
       }
+      res.status(500).json({ erro: erro.message });
     }
   },
 
