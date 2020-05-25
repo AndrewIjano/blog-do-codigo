@@ -8,11 +8,19 @@ module.exports = app => {
 
   app
     .route('/usuario/verifica_email/:token')
-    .get(usuariosControlador.verificaEmail);
+    .get(
+      middlewaresAutenticacao.verificaEmail,
+      usuariosControlador.verificaEmail
+    );
+
+  app.route('/usuario/esqueci_senha').post(usuariosControlador.esqueciSenha);
 
   app
-    .route('/usuario/verifica_email/:token')
-    .get(usuariosControlador.verificaEmail);
+    .route('/usuario/senha/:token')
+    .put(
+      middlewaresAutenticacao.atualizaSenha,
+      usuariosControlador.atualizaSenha
+    );
 
   app
     .route('/usuario/login')

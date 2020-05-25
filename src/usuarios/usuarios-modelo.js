@@ -43,6 +43,11 @@ class Usuario {
     await usuariosDao.modificaEmailVerificado(this, true);
   }
 
+  async modificaSenha(senhaNova) {
+    await this.adicionaSenha(senhaNova);
+    await usuariosDao.modificaSenhaHash(this, this.senhaHash);
+  }
+
   async deleta() {
     return usuariosDao.deleta(this);
   }
