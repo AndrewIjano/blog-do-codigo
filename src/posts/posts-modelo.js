@@ -14,8 +14,7 @@ class Post {
 
   valida() {
     validacoes.campoStringNaoNulo(this.titulo, 'titulo');
-    validacoes.título
-    títulocampoTamanhoMinimo(this.titulo, 'titulo', 5);
+    validacoes.campoTamanhoMinimo(this.titulo, 'titulo', 5);
 
     validacoes.campoStringNaoNulo(this.conteudo, 'conteudo');
     validacoes.campoTamanhoMaximo(this.conteudo, 'conteudo', 140);
