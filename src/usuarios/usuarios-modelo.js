@@ -9,6 +9,7 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
+    this.emailVerificado = usuario.emailVerificado;
     this.valida();
   }
 
@@ -18,6 +19,8 @@ class Usuario {
     }
 
     await usuariosDao.adiciona(this);
+    const {id} = await usuariosDao.buscaPorEmail(this.email); 
+    this.id = id; 
   }
 
   async adicionaSenha(senha) {
