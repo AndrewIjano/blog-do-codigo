@@ -16,12 +16,12 @@ module.exports = {
       const usuario = new Usuario({
         nome,
         email,
-        emailVerificado: false
+        emailVerificado: false,
       });
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
 
-      const endereco = geraEndereco('/usuario/verifica_email/', usuario.id);
+      const endereco = geraEndereco("/usuario/verifica_email/", usuario.id);
       const emailVerificacao = new EmailVerificacao(usuario, endereco);
       emailVerificacao.enviaEmail().catch(console.log);
 
@@ -30,6 +30,16 @@ module.exports = {
       if (erro instanceof InvalidArgumentError) {
         return res.status(400).json({ erro: erro.message });
       }
+      res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async verificaEmail(req, res) {
+    try {
+      const usuario = req.user;
+      await usuario.verificaEmail();
+      res.status(200).json();
+    } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
   },

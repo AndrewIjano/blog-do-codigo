@@ -1,28 +1,35 @@
-const usuariosControlador = require('./usuarios-controlador');
-const middlewaresAutenticacao = require('./middlewares-autenticacao');
+const usuariosControlador = require("./usuarios-controlador");
+const middlewaresAutenticacao = require("./middlewares-autenticacao");
 
-module.exports = app => {
+module.exports = (app) => {
   app
-    .route('/usuario/atualiza_token')
+    .route("/usuario/verifica_email/:id")
+    .get(
+      middlewaresAutenticacao.verificacaoEmail,
+      usuariosControlador.verificaEmail
+    );
+
+  app
+    .route("/usuario/atualiza_token")
     .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
 
   app
-    .route('/usuario/login')
+    .route("/usuario/login")
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 
   app
-    .route('/usuario/logout')
+    .route("/usuario/logout")
     .get(
       [middlewaresAutenticacao.bearer, middlewaresAutenticacao.refresh],
       usuariosControlador.logout
     );
 
   app
-    .route('/usuario')
+    .route("/usuario")
     .post(usuariosControlador.adiciona)
     .get(usuariosControlador.lista);
 
   app
-    .route('/usuario/:id')
+    .route("/usuario/:id")
     .delete(middlewaresAutenticacao.bearer, usuariosControlador.deleta);
 };
