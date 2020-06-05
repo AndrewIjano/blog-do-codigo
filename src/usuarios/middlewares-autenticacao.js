@@ -1,14 +1,14 @@
-const passport = require("passport");
-const Usuario = require("./usuarios-modelo");
-const tokens = require("./tokens");
+const passport = require('passport');
+const Usuario = require('./usuarios-modelo');
+const tokens = require('./tokens');
 
 module.exports = {
   local(req, res, next) {
     passport.authenticate(
-      "local",
+      'local',
       { session: false },
       (erro, usuario, info) => {
-        if (erro && erro.name === "InvalidArgumentError") {
+        if (erro && erro.name === 'InvalidArgumentError') {
           return res.status(401).json({ erro: erro.message });
         }
 
@@ -28,14 +28,14 @@ module.exports = {
 
   bearer(req, res, next) {
     passport.authenticate(
-      "bearer",
+      'bearer',
       { session: false },
       (erro, usuario, info) => {
-        if (erro && erro.name === "JsonWebTokenError") {
+        if (erro && erro.name === 'JsonWebTokenError') {
           return res.status(401).json({ erro: erro.message });
         }
 
-        if (erro && erro.name === "TokenExpiredError") {
+        if (erro && erro.name === 'TokenExpiredError') {
           return res
             .status(401)
             .json({ erro: erro.message, expiradoEm: erro.expiredAt });
@@ -64,7 +64,7 @@ module.exports = {
       req.user = await Usuario.buscaPorId(id);
       return next();
     } catch (erro) {
-      if (erro.name === "InvalidArgumentError") {
+      if (erro.name === 'InvalidArgumentError') {
         return res.status(401).json({ erro: erro.message });
       }
       return res.status(500).json({ erro: erro.message });
@@ -72,9 +72,28 @@ module.exports = {
   },
 
   async verificacaoEmail(req, res, next) {
-    const { id } = req.params;
-    const usuario = await Usuario.buscaPorId(id);
-    req.user = usuario;
-    next();
+    try {
+      const { token } = req.params;
+      const id = await tokens.verificacaoEmail.verifica(token);
+      const usuario = await Usuario.buscaPorId(id);
+      req.user = usuario;
+      next();
+    } catch (erro) {
+      if (erro.name === 'InvalidArgumentError') {
+        return res.status(401).json({ erro: erro.message });
+      }
+
+      if (erro.name === 'JsonWebTokenError') {
+        return res.status(401).json({ erro: erro.message });
+      }
+
+      if (erro.name === 'TokenExpiredError') {
+        return res
+          .status(401)
+          .json({ erro: erro.message, expiradoEm: erro.expiredAt });
+      }
+
+      return res.status(500).json({ erro: erro.message });
+    }
   },
 };

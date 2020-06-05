@@ -2,42 +2,44 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const moment = require('moment');
 
-const whitelistRefreshToken = require('../../redis/whitelist-refresh-token');
-const blacklistAccessToken = require('../../redis/blacklist-access-token');
+const allowlistRefreshToken = require('../../redis/allowlist-refresh-token');
+const blocklistAccessToken = require('../../redis/blocklist-access-token');
 
 const { InvalidArgumentError } = require('../erros');
 
 function criaTokenJWT(id, [tempoQuantidade, tempoUnidade]) {
   return jwt.sign({ id }, process.env.CHAVE_JWT, {
-    expiresIn: tempoQuantidade + tempoUnidade
+    expiresIn: tempoQuantidade + tempoUnidade,
   });
 }
 
-async function verificaTokenJWT(token, nome, blacklist) {
-  await verificaTokenNaBlacklist(token, nome, blacklist);
+async function verificaTokenJWT(token, nome, blocklist) {
+  await verificaTokenNaBlocklist(token, nome, blocklist);
   const { id } = jwt.verify(token, process.env.CHAVE_JWT);
   return id;
 }
 
-async function verificaTokenNaBlacklist(token, nome, blacklist) {
-  const tokenNaBlacklist = await blacklist.contemToken(token);
-  if (tokenNaBlacklist) {
+async function verificaTokenNaBlocklist(token, nome, blocklist) {
+  if (!blocklist) {
+    return;
+  }
+
+  const tokenNaBlocklist = await blocklist.contemToken(token);
+  if (tokenNaBlocklist) {
     throw new jwt.JsonWebTokenError(`${nome} inválido por logout!`);
   }
 }
 
-async function criaTokenOpaco(id, [tempoQuantidade, tempoUnidade], whitelist) {
+async function criaTokenOpaco(id, [tempoQuantidade, tempoUnidade], allowlist) {
   const tokenOpaco = crypto.randomBytes(24).toString('hex');
-  const dataExpiracao = moment()
-    .add(tempoQuantidade, tempoUnidade)
-    .unix();
-  await whitelist.adiciona(tokenOpaco, id, dataExpiracao);
+  const dataExpiracao = moment().add(tempoQuantidade, tempoUnidade).unix();
+  await allowlist.adiciona(tokenOpaco, id, dataExpiracao);
   return tokenOpaco;
 }
 
-async function verificaTokenOpaco(token, nome, whitelist) {
+async function verificaTokenOpaco(token, nome, allowlist) {
   verificaTokenEnviado(token, nome);
-  const id = await whitelist.buscaValor(token);
+  const id = await allowlist.buscaValor(token);
   verificaTokenValido(id, nome);
   return id;
 }
@@ -58,7 +60,7 @@ module.exports = {
   access: {
     nome: 'access token',
     expiracao: [15, 'm'],
-    lista: blacklistAccessToken,
+    lista: blocklistAccessToken,
     cria(id) {
       return criaTokenJWT(id, this.expiracao);
     },
@@ -67,12 +69,12 @@ module.exports = {
     },
     invalida(token) {
       return this.lista.adiciona(token);
-    }
+    },
   },
   refresh: {
     nome: 'refresh token',
     expiracao: [5, 'd'],
-    lista: whitelistRefreshToken,
+    lista: allowlistRefreshToken,
     cria(id) {
       return criaTokenOpaco(id, this.expiracao, this.lista);
     },
@@ -81,6 +83,16 @@ module.exports = {
     },
     invalida(token) {
       return this.lista.deleta(token);
-    }
-  }
+    },
+  },
+  verificacaoEmail: {
+    nome: 'token de verificação de e-mail',
+    expiracao: [1, 'h'],
+    cria(id) {
+      return criaTokenJWT(id, this.expiracao);
+    },
+    verifica(token) {
+      return verificaTokenJWT(token, this.nome);
+    },
+  },
 };
