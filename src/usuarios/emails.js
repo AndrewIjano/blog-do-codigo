@@ -44,10 +44,22 @@ class EmailVerificacao extends Email {
     super();
     this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
     this.to = usuario.email;
-    this.subject = 'Email de verificação';
+    this.subject = 'Verificação de e-mail';
     this.text = `Olá! Confirme seu e-mail aqui: ${endereco}.`;
     this.html = `<h1>Olá!</h1> Confirme seu e-mail aqui: ${endereco}.`;
   }
 }
 
-module.exports = { EmailVerificacao };
+class EmailAtualizacaoSenha extends Email {
+  constructor(usuario, endereco) {
+    super();
+    this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
+    this.to = usuario.email;
+    this.subject = 'Atualização de senha';
+    this.text = `Olá! Atualize sua senha aqui: ${endereco}.`;
+    this.html = `<h1>Olá!</h1> Atualize sua senha aqui: ${endereco}.`;   
+  }
+}
+
+module.exports = { EmailVerificacao, EmailAtualizacaoSenha };
+

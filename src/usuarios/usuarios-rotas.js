@@ -13,6 +13,8 @@ module.exports = (app) => {
     .route('/usuario/atualiza_token')
     .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
 
+  app.route('/usuario/recupera_conta').post(usuariosControlador.recuperaConta);
+
   app
     .route('/usuario/login')
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
