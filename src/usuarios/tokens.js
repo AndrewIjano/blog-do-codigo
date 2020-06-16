@@ -2,8 +2,11 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const moment = require('moment');
 
-const allowlistRefreshToken = require('../../redis/allowlist-refresh-token');
-const blocklistAccessToken = require('../../redis/blocklist-access-token');
+const {
+  allowlistRefreshToken,
+  allowlistTokenAtualizacaoSenha,
+  blocklistAccessToken,
+} = require('../../redis');
 
 const { InvalidArgumentError } = require('../erros');
 
@@ -93,6 +96,20 @@ module.exports = {
     },
     verifica(token) {
       return verificaTokenJWT(token, this.nome);
+    },
+  },
+  atualizacaoSenha: {
+    nome: 'token de atualização de senha',
+    expiracao: [1, 'h'],
+    lista: allowlistTokenAtualizacaoSenha,
+    cria(id) {
+      return criaTokenOpaco(id, this.expiracao, this.lista);
+    },
+    verifica(token) {
+      return verificaTokenOpaco(token, this.nome, this.lista);
+    },
+    invalida(token) {
+      return this.lista.deleta(token);
     },
   },
 };

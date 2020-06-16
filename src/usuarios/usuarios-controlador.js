@@ -65,7 +65,8 @@ module.exports = {
       verificaUsuarioExiste(usuario);
       verificaEmailVerificado(usuario);
 
-      const endereco = geraEndereco('/usuario/recupera_conta/', 'TOKEN');
+      const token = await tokens.atualizacaoSenha.cria(usuario.id);
+      const endereco = geraEndereco('/usuario/senha/', token);
       const emailAtualizacaoSenha = new EmailAtualizacaoSenha(
         usuario,
         endereco
@@ -75,7 +76,7 @@ module.exports = {
       res.status(200).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        res.status(400).json({ erro: erro.message });
+        return res.status(400).json({ erro: erro.message });
       }
       res.status(500).json({ erro: erro.message });
     }
