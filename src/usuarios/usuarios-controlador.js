@@ -2,6 +2,7 @@ const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
 const tokens = require('./tokens');
 const { EmailVerificacao, EmailAtualizacaoSenha } = require('./emails');
+const { atualizacaoSenha } = require('./middlewares-autenticacao');
 
 function geraEndereco(rota, token) {
   const baseURL = process.env.BASE_URL;
@@ -78,6 +79,16 @@ module.exports = {
       if (erro instanceof InvalidArgumentError) {
         return res.status(400).json({ erro: erro.message });
       }
+      res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async atualizaSenha(req, res) {
+    try {
+      const usuario = req.user;
+      await tokens.atualizacaoSenha.invalida(req.token);
+      res.status(200).json(usuario);
+    } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
   },

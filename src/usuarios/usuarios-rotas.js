@@ -16,6 +16,13 @@ module.exports = (app) => {
   app.route('/usuario/recupera_conta').post(usuariosControlador.recuperaConta);
 
   app
+    .route('/usuario/senha/:token')
+    .put(
+      middlewaresAutenticacao.atualizacaoSenha,
+      usuariosControlador.atualizaSenha
+    );
+
+  app
     .route('/usuario/login')
     .post(middlewaresAutenticacao.local, usuariosControlador.login);
 

@@ -77,7 +77,7 @@ module.exports = {
       const id = await tokens.verificacaoEmail.verifica(token);
       const usuario = await Usuario.buscaPorId(id);
       req.user = usuario;
-      next();
+      return next();
     } catch (erro) {
       if (erro.name === 'InvalidArgumentError') {
         return res.status(401).json({ erro: erro.message });
@@ -93,6 +93,22 @@ module.exports = {
           .json({ erro: erro.message, expiradoEm: erro.expiredAt });
       }
 
+      return res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async atualizacaoSenha(req, res, next) {
+    try {
+      const { token } = req.params;
+      const id = await tokens.atualizacaoSenha.verifica(token);
+      const usuario = await Usuario.buscaPorId(id);
+      req.user = usuario;
+      req.token = token;
+      return next();
+    } catch (erro) {
+      if (erro.name === 'InvalidArgumentError') {
+        return res.status(401).json({ erro: erro.message });
+      }
       return res.status(500).json({ erro: erro.message });
     }
   },
