@@ -39,6 +39,7 @@ module.exports = {
       const emailVerificacao = new EmailVerificacao(usuario, endereco);
       emailVerificacao.enviaEmail().catch(console.error);
 
+      const oi = 'oi';
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
@@ -86,9 +87,14 @@ module.exports = {
   async atualizaSenha(req, res) {
     try {
       const usuario = req.user;
+      const { senha } = req.body;
+      await usuario.atualizaSenha(senha);
       await tokens.atualizacaoSenha.invalida(req.token);
-      res.status(200).json(usuario);
+      res.status(200).json();
     } catch (erro) {
+      if (erro instanceof InvalidArgumentError) {
+        return res.status(400).json({ erro: erro.message });
+      }
       res.status(500).json({ erro: erro.message });
     }
   },
