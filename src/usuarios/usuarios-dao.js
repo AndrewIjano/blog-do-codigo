@@ -48,27 +48,14 @@ module.exports = {
     }
   },
 
-  async atualizaSenhaHash(usuario, senhaHash) {
-    try {
-      await dbRun(`UPDATE usuarios SET senhaHash = ? WHERE id = ?`, [
-        senhaHash,
-        usuario.id,
-      ]);
-    } catch (erro) {
-      throw new InternalServerError('Erro ao atualizar a senha!');
-    }
-  },
-
-  async atualizaEmailVerificado(usuario, emailVerificado) {
+  async modificaEmailVerificado(usuario, emailVerificado) {
     try {
       await dbRun(`UPDATE usuarios SET emailVerificado = ? WHERE id = ?`, [
         emailVerificado,
-        usuario.id,
+        usuario.id
       ]);
     } catch (erro) {
-      throw new InternalServerError(
-        'Erro ao atualizar a verificação de e-mail!'
-      );
+      throw new InternalServerError('Erro ao modificar a verficação de e-mail!');
     }
   },
 

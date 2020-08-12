@@ -36,13 +36,9 @@ class Usuario {
     validacoes.campoStringNaoNulo(this.email, 'email');
   }
 
-  async atualizaSenha(senha) {
-    await this.adicionaSenha(senha);
-    await usuariosDao.atualizaSenhaHash(this, this.senhaHash);
-  }
-
   async verificaEmail() {
-    await usuariosDao.atualizaEmailVerificado(this, true);
+    this.emailVerificado = true;
+    await usuariosDao.modificaEmailVerificado(this, this.emailVerificado);
   }
 
   async deleta() {

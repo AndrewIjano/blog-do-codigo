@@ -10,7 +10,7 @@ module.exports = {
       res.status(201).json(post);
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        res.status(400).json({ erro: erro.message });
+        return res.status(400).json({ erro: erro.message });
       }
       res.status(500).json({ erro: erro.message });
     }
@@ -21,7 +21,7 @@ module.exports = {
       const posts = await Post.lista();
       res.json(posts);
     } catch (erro) {
-      return res.status(500).json({ erro: erro });
+      return res.status(500).json({ erro: erro.message });
     }
   }
 };

@@ -1,29 +1,26 @@
 const nodemailer = require('nodemailer');
 
-class ConfiguracaoEmail {
-  constructor() {
-    this.host = process.env.EMAIL_HOST;
-    this.auth = {
-      user: process.env.EMAIL_USUARIO,
-      pass: process.env.EMAIL_SENHA
-    };
-    this.secure = true;
-  }
-}
+const configuracaoEmailProducao = {
+  host: process.env.EMAIL_HOST,
+  auth: {
+    user: process.env.EMAIL_USUARIO,
+    pass: process.env.EMAIL_SENHA
+  },
+  secure: true
+};
 
-class ConfiguracaoEmailTeste {
-  constructor(contaTeste) {
-    this.host = 'smtp.ethereal.email';
-    this.auth = contaTeste;
-  }
-}
+const configuracaoEmailTeste = (contaTeste) => ({
+  host: 'smtp.ethereal.email',
+  auth: contaTeste,
+});
+
 
 async function criaConfiguracaoEmail() {
   if (process.env.NODE_ENV === 'production') {
-    return new ConfiguracaoEmail();
+    return configuracaoEmailProducao;
   } else {
     const contaTeste = await nodemailer.createTestAccount();
-    return new ConfiguracaoEmailTeste(contaTeste);
+    return configuracaoEmailTeste(contaTeste);
   }
 }
 
@@ -32,9 +29,9 @@ class Email {
     const configuracaoEmail = await criaConfiguracaoEmail();
     const transportador = nodemailer.createTransport(configuracaoEmail);
     const info = await transportador.sendMail(this);
-
+  
     if (process.env.NODE_ENV !== 'production') {
-      console.log('URL:' + nodemailer.getTestMessageUrl(info));
+      console.log('URL: ' + nodemailer.getTestMessageUrl(info));
     }
   }
 }
@@ -45,21 +42,9 @@ class EmailVerificacao extends Email {
     this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
     this.to = usuario.email;
     this.subject = 'Verificação de e-mail';
-    this.text = `Olá! Confirme seu e-mail aqui: ${endereco}.`;
-    this.html = `<h1>Olá!</h1> Confirme seu e-mail aqui: ${endereco}.`;
+    this.text = `Olá! Verifique seu e-mail aqui: ${endereco}`;
+    this.html = `<h1>Olá!</h1> Verifique seu e-mail aqui: <a href="${endereco}">${endereco}</a>`;
   }
 }
 
-class EmailAtualizacaoSenha extends Email {
-  constructor(usuario, endereco) {
-    super();
-    this.from = '"Blog do Código" <noreply@blogdocodigo.com.br>';
-    this.to = usuario.email;
-    this.subject = 'Atualização de senha';
-    this.text = `Olá! Atualize sua senha aqui: ${endereco}.`;
-    this.html = `<h1>Olá!</h1> Atualize sua senha aqui: ${endereco}.`;   
-  }
-}
-
-module.exports = { EmailVerificacao, EmailAtualizacaoSenha };
-
+module.exports = { EmailVerificacao };

@@ -16,6 +16,7 @@ function verificaUsuario(usuario) {
   }
 }
 
+
 async function verificaSenha(senha, senhaHash) {
   const senhaValida = await bcrypt.compare(senha, senhaHash);
   if (!senhaValida) {
@@ -28,7 +29,7 @@ passport.use(
     {
       usernameField: 'email',
       passwordField: 'senha',
-      session: false
+      session: false,
     },
     async (email, senha, done) => {
       try {
