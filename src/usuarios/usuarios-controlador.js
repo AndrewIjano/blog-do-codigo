@@ -39,7 +39,7 @@ module.exports = {
   async login(req, res) {
     try {
       const accessToken = tokens.access.cria(req.user.id);
-      const refreshToken = await tokens.refresh.cria(req.user.id);
+      const refreshToken = await tokens.refresh.cria(req.user.id, req.refreshToken);
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken });
     } catch (erro) {

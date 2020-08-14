@@ -63,6 +63,7 @@ module.exports = {
       const id = await tokens.refresh.verifica(refreshToken);
       await tokens.refresh.invalida(refreshToken);
       req.user = await Usuario.buscaPorId(id);
+      req.refreshToken = refreshToken;
       return next();
     } catch (erro) {
       if (erro.name === 'InvalidArgumentError') {
