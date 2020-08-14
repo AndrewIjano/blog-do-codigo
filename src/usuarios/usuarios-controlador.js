@@ -1,23 +1,12 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
+
 const tokens = require('./tokens');
-const { EmailVerificacao, EmailAtualizacaoSenha } = require('./emails');
+const { EmailVerificacao } = require('./emails');
 
 function geraEndereco(rota, token) {
   const baseURL = process.env.BASE_URL;
   return `${baseURL}${rota}${token}`;
-}
-
-function verificaUsuarioExiste(usuario) {
-  if (!usuario) {
-    throw new InvalidArgumentError('Não existe usuário com esse e-mail!');
-  }
-}
-
-function verificaEmailVerificado(usuario) {
-  if (!usuario.emailVerificado) {
-    throw new InvalidArgumentError('E-mail não verificado!');
-  }
 }
 
 module.exports = {
@@ -36,7 +25,7 @@ module.exports = {
       const token = tokens.verificacaoEmail.cria(usuario.id);
       const endereco = geraEndereco('/usuario/verifica_email/', token);
       const emailVerificacao = new EmailVerificacao(usuario, endereco);
-      emailVerificacao.enviaEmail().catch(console.error);
+      emailVerificacao.enviaEmail().catch(console.log);
 
       res.status(201).json();
     } catch (erro) {
@@ -47,45 +36,10 @@ module.exports = {
     }
   },
 
-  async verificaEmail(req, res) {
-    try {
-      const usuario = req.user;
-      await usuario.verificaEmail();
-      res.status(200).json();
-    } catch (erro) {
-      res.status(500).json({ erro: erro.message });
-    }
-  },
-
-  async recuperaConta(req, res) {
-    try {
-      const { email } = req.body;
-      const usuario = await Usuario.buscaPorEmail(email);
-
-      verificaUsuarioExiste(usuario);
-      verificaEmailVerificado(usuario);
-
-      const endereco = geraEndereco('/usuario/recupera_conta/', 'TOKEN');
-      const emailAtualizacaoSenha = new EmailAtualizacaoSenha(
-        usuario,
-        endereco
-      );
-      emailAtualizacaoSenha.enviaEmail().catch(console.error);
-
-      res.status(200).json();
-    } catch (erro) {
-      if (erro instanceof InvalidArgumentError) {
-        res.status(400).json({ erro: erro.message });
-      }
-      res.status(500).json({ erro: erro.message });
-    }
-  },
-
   async login(req, res) {
     try {
-      const usuario = req.user;
-      const accessToken = tokens.access.cria(usuario.id);
-      const refreshToken = await tokens.refresh.cria(usuario.id);
+      const accessToken = tokens.access.cria(req.user.id);
+      const refreshToken = await tokens.refresh.cria(req.user.id, req.refreshToken);
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken });
     } catch (erro) {
@@ -97,7 +51,7 @@ module.exports = {
     try {
       const token = req.token;
       await tokens.access.invalida(token);
-      res.status(200).json();
+      res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
@@ -107,6 +61,16 @@ module.exports = {
     try {
       const usuarios = await Usuario.lista();
       res.json(usuarios);
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message });
+    }
+  },
+
+  async verificaEmail(req, res) {
+    try {
+      const usuario = req.user;
+      await usuario.verificaEmail();
+      res.status(200).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }

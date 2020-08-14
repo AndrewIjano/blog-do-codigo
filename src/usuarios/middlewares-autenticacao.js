@@ -1,5 +1,6 @@
 const passport = require('passport');
 const Usuario = require('./usuarios-modelo');
+const { InvalidArgumentError } = require('../erros');
 const tokens = require('./tokens');
 
 module.exports = {
@@ -62,6 +63,7 @@ module.exports = {
       const id = await tokens.refresh.verifica(refreshToken);
       await tokens.refresh.invalida(refreshToken);
       req.user = await Usuario.buscaPorId(id);
+      req.refreshToken = refreshToken;
       return next();
     } catch (erro) {
       if (erro.name === 'InvalidArgumentError') {
@@ -79,18 +81,15 @@ module.exports = {
       req.user = usuario;
       next();
     } catch (erro) {
-      if (erro.name === 'InvalidArgumentError') {
-        return res.status(401).json({ erro: erro.message });
-      }
-
       if (erro.name === 'JsonWebTokenError') {
         return res.status(401).json({ erro: erro.message });
       }
 
       if (erro.name === 'TokenExpiredError') {
-        return res
-          .status(401)
-          .json({ erro: erro.message, expiradoEm: erro.expiredAt });
+        return res.status(401).json({
+          erro: erro.message,
+          expiradoEm: erro.expiredAt,
+        });
       }
 
       return res.status(500).json({ erro: erro.message });

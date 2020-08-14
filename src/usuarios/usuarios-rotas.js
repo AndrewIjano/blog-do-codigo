@@ -1,19 +1,10 @@
 const usuariosControlador = require('./usuarios-controlador');
 const middlewaresAutenticacao = require('./middlewares-autenticacao');
 
-module.exports = (app) => {
-  app
-    .route('/usuario/verifica_email/:token')
-    .get(
-      middlewaresAutenticacao.verificacaoEmail,
-      usuariosControlador.verificaEmail
-    );
-
+module.exports = app => {
   app
     .route('/usuario/atualiza_token')
     .post(middlewaresAutenticacao.refresh, usuariosControlador.login);
-
-  app.route('/usuario/recupera_conta').post(usuariosControlador.recuperaConta);
 
   app
     .route('/usuario/login')
@@ -21,8 +12,8 @@ module.exports = (app) => {
 
   app
     .route('/usuario/logout')
-    .get(
-      [middlewaresAutenticacao.bearer, middlewaresAutenticacao.refresh],
+    .post(
+      [middlewaresAutenticacao.refresh, middlewaresAutenticacao.bearer],
       usuariosControlador.logout
     );
 
@@ -30,6 +21,13 @@ module.exports = (app) => {
     .route('/usuario')
     .post(usuariosControlador.adiciona)
     .get(usuariosControlador.lista);
+
+  app
+    .route('/usuario/verifica_email/:token')
+    .get(
+      middlewaresAutenticacao.verificacaoEmail,
+      usuariosControlador.verificaEmail
+    );
 
   app
     .route('/usuario/:id')

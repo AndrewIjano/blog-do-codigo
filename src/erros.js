@@ -5,6 +5,13 @@ class InvalidArgumentError extends Error {
   }
 }
 
+class InvalidRefreshTokenError extends InvalidArgumentError {
+  constructor(mensagem) {
+    super(mensagem);
+    this.name = 'InvalidRefreshTokenError';
+  }
+}
+
 class InternalServerError extends Error {
   constructor(mensagem) {
     super(mensagem);
@@ -12,4 +19,4 @@ class InternalServerError extends Error {
   }
 }
 
-module.exports = { InvalidArgumentError, InternalServerError };
+module.exports = { InvalidArgumentError, InternalServerError,  InvalidRefreshTokenError};

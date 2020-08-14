@@ -37,7 +37,8 @@ class Usuario {
   }
 
   async verificaEmail() {
-    await usuariosDao.modificaEmailVerificado(this, true);
+    this.emailVerificado = true;
+    await usuariosDao.modificaEmailVerificado(this, this.emailVerificado);
   }
 
   async deleta() {

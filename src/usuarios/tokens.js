@@ -2,15 +2,18 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const moment = require('moment');
 
+const { InvalidArgumentError, InvalidRefreshTokenError } = require('../erros');
+
 const allowlistRefreshToken = require('../../redis/allowlist-refresh-token');
 const blocklistAccessToken = require('../../redis/blocklist-access-token');
-
-const { InvalidArgumentError } = require('../erros');
+const listaRefreshTokensAntigos = require('../../redis/lista-refresh-tokens-antigos');
 
 function criaTokenJWT(id, [tempoQuantidade, tempoUnidade]) {
-  return jwt.sign({ id }, process.env.CHAVE_JWT, {
+  const payload = { id };
+  const token = jwt.sign(payload, process.env.CHAVE_JWT, {
     expiresIn: tempoQuantidade + tempoUnidade,
   });
+  return token;
 }
 
 async function verificaTokenJWT(token, nome, blocklist) {
@@ -30,6 +33,10 @@ async function verificaTokenNaBlocklist(token, nome, blocklist) {
   }
 }
 
+function invalidaTokenJWT(token, blocklist) {
+  return blocklist.adiciona(token);
+}
+
 async function criaTokenOpaco(id, [tempoQuantidade, tempoUnidade], allowlist) {
   const tokenOpaco = crypto.randomBytes(24).toString('hex');
   const dataExpiracao = moment().add(tempoQuantidade, tempoUnidade).unix();
@@ -44,23 +51,27 @@ async function verificaTokenOpaco(token, nome, allowlist) {
   return id;
 }
 
+async function invalidaTokenOpaco(token, allowlist) {
+  await allowlist.deleta(token);
+}
+
+function verificaTokenValido(id, nome) {
+  if (!id) {
+    throw new InvalidRefreshTokenError(`${nome} inválido!`);
+  }
+}
+
 function verificaTokenEnviado(token, nome) {
   if (!token) {
     throw new InvalidArgumentError(`${nome} não enviado!`);
   }
 }
 
-function verificaTokenValido(id, nome) {
-  if (!id) {
-    throw new InvalidArgumentError(`${nome} inválido!`);
-  }
-}
-
 module.exports = {
   access: {
     nome: 'access token',
-    expiracao: [15, 'm'],
     lista: blocklistAccessToken,
+    expiracao: [15, 'm'],
     cria(id) {
       return criaTokenJWT(id, this.expiracao);
     },
@@ -68,21 +79,49 @@ module.exports = {
       return verificaTokenJWT(token, this.nome, this.lista);
     },
     invalida(token) {
-      return this.lista.adiciona(token);
+      return invalidaTokenJWT(token, this.lista);
     },
   },
   refresh: {
     nome: 'refresh token',
-    expiracao: [5, 'd'],
     lista: allowlistRefreshToken,
-    cria(id) {
-      return criaTokenOpaco(id, this.expiracao, this.lista);
+    expiracao: [5, 'd'],
+    async cria(id, tokenAntigo) {
+      const payload = JSON.stringify({ id, tokenAntigo });
+      const tokenNovo = await criaTokenOpaco(
+        payload,
+        this.expiracao,
+        this.lista
+      );
+      if (tokenAntigo) {
+        const [tempoQuantidade, tempoUnidade] = this.expiracao;
+        const dataExpiracao = moment()
+          .add(tempoQuantidade, tempoUnidade)
+          .unix();
+        await listaRefreshTokensAntigos.adiciona(
+          tokenAntigo,
+          tokenNovo,
+          dataExpiracao
+        );
+      }
+
+      return tokenNovo;
     },
-    verifica(token) {
-      return verificaTokenOpaco(token, this.nome, this.lista);
+    async verifica(token) {
+      try {
+        const payload = await verificaTokenOpaco(token, this.nome, this.lista);
+        const { id } = JSON.parse(payload);
+        return id;
+      } catch (erro) {
+        if (erro instanceof InvalidRefreshTokenError) {
+          const tokenNovo = await listaRefreshTokensAntigos.buscaValor(token);
+          await allowlistRefreshToken.deleta(tokenNovo);
+        }
+        throw new InvalidArgumentError(erro.message);
+      }
     },
     invalida(token) {
-      return this.lista.deleta(token);
+      return invalidaTokenOpaco(token, this.lista);
     },
   },
   verificacaoEmail: {
